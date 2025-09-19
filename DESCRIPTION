@@ -1,0 +1,28 @@
+Package: dietrecallkit
+Title: Toolkit for Cleaning and Processing Dietary Recall Data and
+    Indicators
+Version: 0.0.0.9000
+Authors@R: 
+    person("Tosin", "Akingbemisilu", , "you@example.com", role = c("aut", "cre"))
+Description: Utilities to clean, process, and generate indicators from
+    dietary recall data.
+License: MIT + file LICENSE
+Depends: 
+    R (>= 4.1.0)
+Encoding: UTF-8
+LazyData: false
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports: dplyr,
+    ggplot2,
+    rlang,
+    stats,
+    tibble,
+    tidyr
+Suggests: covr,
+    knitr,
+    lintr,
+    pkgdown,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
