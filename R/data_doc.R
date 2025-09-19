@@ -1,0 +1,35 @@
+#' Example Dietary Recall Dataset
+#'
+#' A lightweight three-table relational dataset extracted from a dietary recall survey.
+#' Contains 100 unique observations with corresponding food details and ingredient groups.
+#'
+#' @format A list with three tibbles:
+#' \describe{
+#'   \item{maintable}{100 rows × 9 columns.
+#'     Columns:
+#'     \describe{
+#'       \item{survey_id}{Unique identifier for each recall survey}
+#'       \item{household_id}{Identifier for the household}
+#'       \item{survey_date}{Date of the recall survey}
+#'       \item{recall_number}{Recall round number}
+#'       \item{county}{County of the household}
+#'       \item{subcounty}{Subcounty of the household}
+#'       \item{ward}{Ward of the household}
+#'       \item{cu}{Community unit}
+#'       \item{mothers_age_in_years}{Age of the mother in years}
+#'     }}
+#'   \item{food_details}{Tibble with repeated observations of food items linked by `survey_id`}
+#'   \item{food_ingredients_group}{Tibble with grouped food ingredients linked by `survey_id`}
+#' }
+#'
+#' @details
+#' This dataset preserves relational integrity across the three tables.
+#' The `survey_id` column in \code{maintable} serves as a foreign key in
+#' \code{food_details} and \code{food_ingredients_group}.
+#'
+#' @examples
+#' data(dietrecall_example)
+#' str(dietrecall_example$maintable)
+#' head(dietrecall_example$food_details)
+#' head(dietrecall_example$food_ingredients_group)
+"dietrecall_example"

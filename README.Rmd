@@ -2,7 +2,6 @@
 output: github_document
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -18,7 +17,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of dietrecallkit is to ...
+**dietrecallkit** provides tools to clean, process, and generate indicators from dietary recall data. It is designed to handle raw recall tables and their linked food details, ensuring reproducible workflows for nutrition research.
 
 ## Installation
 
@@ -31,25 +30,23 @@ pak::pak("tosmartak/dietrecallkitR")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+The package comes with a lightweight, relational example dataset called dietrecall_example. This dataset contains three linked tables: `maintable`, `food_details`, and `food_ingredients_group` similar to what you would have when you used the dietary recall questionnaire from the 24hour recall toolkit.
+
+Note: the dataset is just a sample and not a real dataset and must be loaded explicitly with data() since LazyData is set to false”
 
 ```{r example}
 library(dietrecallkit)
-## basic example code
+
+# Load the example dataset
+data("dietrecall_example")
+
+# Explore maintable
+head(dietrecall_example$maintable)
+
+# Linked food details
+head(dietrecall_example$food_details)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
 
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+## Contributing
+We welcome contributions! Please see the issues page for ideas or open a new issue.

@@ -1,12 +1,13 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # dietrecallkit
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of dietrecallkit is to …
+**dietrecallkit** provides tools to clean, process, and generate
+indicators from dietary recall data. It is designed to handle raw recall
+tables and their linked food details, ensuring reproducible workflows
+for nutrition research.
 
 ## Installation
 
@@ -20,33 +21,85 @@ pak::pak("tosmartak/dietrecallkitR")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+The package comes with a lightweight, relational example dataset called
+dietrecall_example. This dataset contains three linked tables:
+`maintable`, `food_details`, and `food_ingredients_group` similar to
+what you would have when you used the dietary recall questionnaire from
+the 24hour recall toolkit.
+
+Note: the dataset is just a sample and not a real dataset and must be
+loaded explicitly with data() since LazyData is set to false”
 
 ``` r
 library(dietrecallkit)
-## basic example code
+
+# Load the example dataset
+data("dietrecall_example")
+
+# Explore maintable
+head(dietrecall_example$maintable)
+#>           survey_id household_id survey_date recall_number  county subcounty
+#> 1 0111251492-161123   0111251492  2023-11-16 Repeat recall NAIROBI  MAKADARA
+#> 2 0111251492-241023   0111251492  2023-10-24  First recall NAIROBI  MAKADARA
+#> 3 0111323284-291023   0111323284  2023-10-29  First recall NAIROBI  MAKADARA
+#> 4 0111333496-161123   0111333496  2023-11-16 Repeat recall NAIROBI  MAKADARA
+#> 5 0111333496-241023   0111333496  2023-10-24  First recall NAIROBI  MAKADARA
+#> 6 0112183531-091123   0112183531  2023-11-09 Repeat recall NAIROBI  MAKADARA
+#>        ward                cu mothers_age_in_years
+#> 1 VIWANDANI            UCHUMI                   30
+#> 2 VIWANDANI            UCHUMI                   30
+#> 3 VIWANDANI      PARADISE TUI                   36
+#> 4 VIWANDANI             DAIMA                   35
+#> 5 VIWANDANI             DAIMA                   35
+#> 6 VIWANDANI PARADISE ORIGINAL                   27
+
+# Linked food details
+head(dietrecall_example$food_details)
+#>           survey_id food_details_rowid    food_item_selected
+#> 1 0111251492-161123                  1                Orange
+#> 2 0111251492-161123                  2 Managu/spinach/terere
+#> 3 0111251492-161123                  3                 Ugali
+#> 4 0111251492-161123                  4                 Kales
+#> 5 0111251492-161123                  5                 Ugali
+#> 6 0111251492-161123                  6                 Bread
+#>   food_preparation_place ready_to_eat                desc_of_food
+#> 1           Outside Home           NA Orange (chungwa), pulp, raw
+#> 2                   Home            0                        <NA>
+#> 3                   Home            0                        <NA>
+#> 4                   Home            0                        <NA>
+#> 5                   Home            0                        <NA>
+#> 6           Outside Home           NA                Bread, White
+#>                dish_foodgroup food_consumption_place food_cooking_method
+#> 1                Other fruits           Outside Home                <NA>
+#> 2                        <NA>                   Home         Stir frying
+#> 3                        <NA>                   Home             Boiling
+#> 4                        <NA>                   Home         Stir frying
+#> 5                        <NA>                   Home             Boiling
+#> 6 Cereals and Cereal Products                   Home                <NA>
+#>   food_cooking_method_other amt_of_food_cooked unit_amt_of_food_cooked
+#> 1                        NA                 NA                    <NA>
+#> 2                        NA                316                     mls
+#> 3                        NA                760        g from photobook
+#> 4                        NA                208                     mls
+#> 5                        NA                760        g from photobook
+#> 6                        NA                 NA                    <NA>
+#>   qty_food_consumed unit_qty_food_consumed food_item_price_prop_consumed
+#> 1                10            Price (kes)                             1
+#> 2                69                    mls                            NA
+#> 3               285       g from photobook                            NA
+#> 4                69                    mls                            NA
+#> 5               380       g from photobook                            NA
+#> 6               104       g from photobook                            NA
+#>                                rowuuid
+#> 1 d84a66a5-21f7-4eb6-92f2-0b776087b41a
+#> 2 a012b128-567d-46da-a5aa-b2cfd96b5c0f
+#> 3 3038d9ef-7e1b-4674-ab97-1ba5b595d114
+#> 4 5c9cf62b-5a1a-4dff-b2c8-c5b505191f9c
+#> 5 cfec0b9c-1eb6-4808-9449-6598481a4118
+#> 6 27b5c807-b11c-4c66-a449-061f95f28f06
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+## Contributing
 
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
+We welcome contributions! Please see the issues page for ideas or open a
+new issue.

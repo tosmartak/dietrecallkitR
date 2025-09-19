@@ -4,3 +4,4 @@
 ^\.github$
 ^\.lintr$
 ^dietrecallkitR\.Rproj$
+^data-raw$
