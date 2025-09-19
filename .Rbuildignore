@@ -3,3 +3,4 @@
 ^scripts$
 ^\.github$
 ^\.lintr$
+^dietrecallkitR\.Rproj$

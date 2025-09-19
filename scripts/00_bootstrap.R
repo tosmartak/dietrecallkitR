@@ -101,7 +101,7 @@ usethis::ui_silence(usethis::use_roxygen_md())
 usethis::ui_silence(usethis::use_testthat(edition = 3))
 usethis::ui_silence(usethis::use_mit_license("Tosin Akingbemisilu"))
 usethis::ui_silence(usethis::use_git_ignore(c(".Rhistory", ".Rproj.user", ".DS_Store", "inst/doc")))
-usethis::ui_silence(usethis::use_build_ignore(c("scripts", "README.Rmd", "LICENSE.md", ".github")))
+usethis::ui_silence(usethis::use_build_ignore(c("scripts", "README.Rmd", "LICENSE.md", ".github", ".Rproj")))
 
 # Optional: lintr config
 if (!file.exists(".lintr")) {
@@ -114,7 +114,7 @@ if (!file.exists("NEWS.md")) {
   writeLines(c(
     "# dietrecallkit 0.0.0.9000",
     "",
-    "* Initial package scaffold."
+    "* Initial scaffolding commit (package setup with devtools/usethis)."
   ), "NEWS.md")
 }
 
