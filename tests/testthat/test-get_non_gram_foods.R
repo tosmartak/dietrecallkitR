@@ -104,3 +104,48 @@ test_that("get_non_gram_foods returns message and empty tibble when all units ar
   get_non_gram_foods(tmpfile, export_path = out_file)
   expect_false(file.exists(out_file))
 })
+
+test_that("get_non_gram_foods respects desc_of_food filtering", {
+  tmpfile <- tempfile(fileext = ".xlsx")
+
+  # Inject rows with NA desc_of_food
+  fd <- dietrecall_example$food_details %>%
+    dplyr::mutate(desc_of_food = ifelse(row_number() == 1, NA, desc_of_food))
+
+  openxlsx::write.xlsx(
+    list(
+      maintable = dietrecall_example$maintable,
+      food_details = fd,
+      food_ingredients_group = dietrecall_example$food_ingredients_group
+    ),
+    tmpfile
+  )
+
+  result <- get_non_gram_foods(tmpfile)
+
+  # Ensure NA desc_of_food rows are excluded
+  expect_false(any(is.na(result$food_item)))
+})
+
+test_that("get_non_gram_foods works with custom sheet names", {
+  tmpfile <- tempfile(fileext = ".xlsx")
+
+  openxlsx::write.xlsx(
+    list(
+      mt = dietrecall_example$maintable,
+      fd = dietrecall_example$food_details,
+      fig = dietrecall_example$food_ingredients_group
+    ),
+    tmpfile
+  )
+
+  result <- get_non_gram_foods(
+    tmpfile,
+    maintable_sheet = "mt",
+    food_details_sheet = "fd",
+    food_ingredients_sheet = "fig"
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_true(all(c("subcounty", "food_item", "unit", "amount", "gram") %in% names(result)))
+})

@@ -10,10 +10,15 @@
 #' for user input. Users are expected to fill in only these two columns and
 #' should avoid modifying \code{subcounty}, \code{food_item}, or \code{unit}.
 #'
-#' @param filepath Path to the Excel file containing the sheets
-#'   \code{maintable}, \code{food_details}, and \code{food_ingredients_group}.
+#' @param filepath Path to the Excel file containing the dietary recall sheets.
 #' @param subcounty_col Name of the subcounty column in the maintable.
 #'   Defaults to \code{"subcounty"}.
+#' @param maintable_sheet Name of the sheet containing the maintable.
+#'   Defaults to \code{"maintable"}.
+#' @param food_details_sheet Name of the sheet containing the food details.
+#'   Defaults to \code{"food_details"}.
+#' @param food_ingredients_sheet Name of the sheet containing food ingredients.
+#'   Defaults to \code{"food_ingredients_group"}.
 #' @param export_path Optional. File path to export results as an Excel file.
 #'   If supplied, the Excel file will be created with all required columns and
 #'   empty \code{amount} and \code{gram} fields for later user input.
@@ -35,50 +40,38 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Write packaged example dataset to a temporary Excel file
-#' tmpfile <- tempfile(fileext = ".xlsx")
-#' openxlsx::write.xlsx(
-#'   list(
-#'     maintable = dietrecall_example$maintable,
-#'     food_details = dietrecall_example$food_details,
-#'     food_ingredients_group = dietrecall_example$food_ingredients_group
-#'   ),
-#'   tmpfile
-#' )
-#'
 #' # Return tibble only
-#' df <- get_non_gram_foods(tmpfile)
-#' head(df)
+#' get_non_gram_foods("dietary_recall_full.xlsx")
 #'
 #' # Return tibble and export to Excel
-#' out_file <- tempfile(fileext = ".xlsx")
-#' get_non_gram_foods(tmpfile, export_path = out_file)
-#'
-#' # In the exported file:
-#' # - Use the 'amount' and 'gram' columns for input
-#' # - Do not modify 'subcounty', 'food_item', or 'unit'
+#' get_non_gram_foods("dietary_recall_full.xlsx", export_path = "non_gram_foods.xlsx")
 #' }
 #'
 #' @export
 get_non_gram_foods <- function(filepath,
                                subcounty_col = "subcounty",
+                               maintable_sheet = "maintable",
+                               food_details_sheet = "food_details",
+                               food_ingredients_sheet = "food_ingredients_group",
                                export_path = NULL) {
   stopifnot(file.exists(filepath))
 
-  if (!requireNamespace("readxl", quietly = TRUE)) {
-    stop("Package 'readxl' is required but not installed.")
-  }
-  if (!requireNamespace("dplyr", quietly = TRUE)) {
-    stop("Package 'dplyr' is required but not installed.")
-  }
-  if (!requireNamespace("stringr", quietly = TRUE)) {
-    stop("Package 'stringr' is required but not installed.")
+  if (!requireNamespace("readxl", quietly = TRUE)) stop("Package 'readxl' is required but not installed.")
+  if (!requireNamespace("dplyr", quietly = TRUE)) stop("Package 'dplyr' is required but not installed.")
+  if (!requireNamespace("stringr", quietly = TRUE)) stop("Package 'stringr' is required but not installed.")
+
+  # ---- Ensure sheets exist ----
+  sheets <- readxl::excel_sheets(filepath)
+  for (s in c(maintable_sheet, food_details_sheet, food_ingredients_sheet)) {
+    if (!(s %in% sheets)) stop("Sheet '", s, "' not found in Excel file.")
   }
 
-  maintable <- readxl::read_excel(filepath, sheet = "maintable")
-  food_details <- readxl::read_excel(filepath, sheet = "food_details")
-  food_ingredients_group <- readxl::read_excel(filepath, sheet = "food_ingredients_group")
+  # ---- Read sheets ----
+  maintable <- readxl::read_excel(filepath, sheet = maintable_sheet)
+  food_details <- readxl::read_excel(filepath, sheet = food_details_sheet)
+  food_ingredients_group <- readxl::read_excel(filepath, sheet = food_ingredients_sheet)
 
+  # ---- Validate subcounty column ----
   if (!subcounty_col %in% names(maintable)) {
     stop("Column '", subcounty_col, "' not found in maintable.")
   }
@@ -86,7 +79,7 @@ get_non_gram_foods <- function(filepath,
   # ---- food_details ----
   df1 <- food_details %>%
     dplyr::filter(
-      (food_preparation_place == "Outside Home" | ready_to_eat == 1),
+      !is.na(desc_of_food),
       !unit_qty_food_consumed %in% c("g from scale", "g from photobook")
     ) %>%
     dplyr::left_join(
@@ -95,7 +88,7 @@ get_non_gram_foods <- function(filepath,
     ) %>%
     dplyr::select(
       subcounty = !!rlang::sym(subcounty_col),
-      food_item = food_item_selected,
+      food_item = desc_of_food,
       unit = unit_qty_food_consumed
     )
 
@@ -130,17 +123,14 @@ get_non_gram_foods <- function(filepath,
     return(final)
   }
 
-  # ---- Optional Excel export if results exist ----
+  # ---- Optional Excel export ----
   if (nrow(final) > 0 && !is.null(export_path)) {
     if (!requireNamespace("openxlsx", quietly = TRUE)) {
       stop("Package 'openxlsx' is required for export but not installed.")
     }
-
     wb <- openxlsx::createWorkbook()
     openxlsx::addWorksheet(wb, "non_gram_foods")
     openxlsx::writeData(wb, "non_gram_foods", final)
-
-    # Write files into excel
     openxlsx::saveWorkbook(wb, export_path, overwrite = TRUE)
   }
 

@@ -4,14 +4,29 @@
 \alias{get_non_gram_foods}
 \title{Get Non-Gram Foods}
 \usage{
-get_non_gram_foods(filepath, subcounty_col = "subcounty", export_path = NULL)
+get_non_gram_foods(
+  filepath,
+  subcounty_col = "subcounty",
+  maintable_sheet = "maintable",
+  food_details_sheet = "food_details",
+  food_ingredients_sheet = "food_ingredients_group",
+  export_path = NULL
+)
 }
 \arguments{
-\item{filepath}{Path to the Excel file containing the sheets
-\code{maintable}, \code{food_details}, and \code{food_ingredients_group}.}
+\item{filepath}{Path to the Excel file containing the dietary recall sheets.}
 
 \item{subcounty_col}{Name of the subcounty column in the maintable.
 Defaults to \code{"subcounty"}.}
+
+\item{maintable_sheet}{Name of the sheet containing the maintable.
+Defaults to \code{"maintable"}.}
+
+\item{food_details_sheet}{Name of the sheet containing the food details.
+Defaults to \code{"food_details"}.}
+
+\item{food_ingredients_sheet}{Name of the sheet containing food ingredients.
+Defaults to \code{"food_ingredients_group"}.}
 
 \item{export_path}{Optional. File path to export results as an Excel file.
 If supplied, the Excel file will be created with all required columns and
@@ -46,28 +61,11 @@ and skip Excel export (even if \code{export_path} is provided).
 }
 \examples{
 \dontrun{
-# Write packaged example dataset to a temporary Excel file
-tmpfile <- tempfile(fileext = ".xlsx")
-openxlsx::write.xlsx(
-  list(
-    maintable = dietrecall_example$maintable,
-    food_details = dietrecall_example$food_details,
-    food_ingredients_group = dietrecall_example$food_ingredients_group
-  ),
-  tmpfile
-)
-
 # Return tibble only
-df <- get_non_gram_foods(tmpfile)
-head(df)
+get_non_gram_foods("dietary_recall_full.xlsx")
 
 # Return tibble and export to Excel
-out_file <- tempfile(fileext = ".xlsx")
-get_non_gram_foods(tmpfile, export_path = out_file)
-
-# In the exported file:
-# - Use the 'amount' and 'gram' columns for input
-# - Do not modify 'subcounty', 'food_item', or 'unit'
+get_non_gram_foods("dietary_recall_full.xlsx", export_path = "non_gram_foods.xlsx")
 }
 
 }
