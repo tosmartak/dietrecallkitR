@@ -1,4 +1,4 @@
-#' Get Unique Non-Gram Food Items
+#' Get Non-Gram Foods
 #'
 #' Extracts unique food items from a dietary recall Excel file where units are
 #' not measured in grams (scale or photobook). Combines results from the
@@ -26,6 +26,12 @@
 #'   \item{amount}{Empty column for later input}
 #'   \item{gram}{Empty column for later input}
 #' }
+#'
+#' @details
+#' If all food items in the dataset are recorded in grams
+#' ("g from scale" or "g from photobook"), the function will return
+#' an empty tibble with the correct columns, print a message to the user,
+#' and skip Excel export (even if \code{export_path} is provided).
 #'
 #' @examples
 #' \dontrun{
@@ -114,15 +120,25 @@ get_non_gram_foods <- function(filepath,
   final <- combined %>%
     dplyr::mutate(amount = NA_real_, gram = NA_real_)
 
-  # ---- Optional Excel export ----
-  if (!is.null(export_path)) {
+  # ---- Early exit if no non-gram foods ----
+  if (nrow(final) == 0) {
+    message(
+      "All food items in the dataset are recorded in grams ",
+      '("g from scale" or "g from photobook").\n',
+      "No non-gram food items were found."
+    )
+    return(final)
+  }
+
+  # ---- Optional Excel export if results exist ----
+  if (nrow(final) > 0 && !is.null(export_path)) {
     if (!requireNamespace("openxlsx", quietly = TRUE)) {
       stop("Package 'openxlsx' is required for export but not installed.")
     }
 
     wb <- openxlsx::createWorkbook()
-    openxlsx::addWorksheet(wb, "unique_food_items")
-    openxlsx::writeData(wb, "unique_food_items", final)
+    openxlsx::addWorksheet(wb, "non_gram_foods")
+    openxlsx::writeData(wb, "non_gram_foods", final)
 
     # Write files into excel
     openxlsx::saveWorkbook(wb, export_path, overwrite = TRUE)

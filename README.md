@@ -1,25 +1,59 @@
 
-# dietrecallkit
+# dietrecallkit Package - R
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-**dietrecallkit** provides tools to clean, process, and generate
-indicators from dietary recall data. It is designed to handle raw recall
-tables and their linked food details, ensuring reproducible workflows
-for nutrition research.
+**dietrecallkit** is a cross-platform package designed to enhance the
+efficiency of researchers and analysts in cleaning, processing, and
+calculating complex dietary and nutrient indicators from dietary recall
+data. Built for both **Python** and **R**, it provides tools to
+streamline workflows, ensuring accurate and reproducible results in
+dietary and nutrition-related studies.
 
-## Installation
+------------------------------------------------------------------------
+
+## **Key Features**
+
+- Efficient cleaning of data collected using the built in XLSForm
+- Efficient computation of nutrient and dietary indicators.
+- Compatible with **Python** and **R**, catering to a wide range of
+  researchers. ([See Python
+  Repository](https://github.com/tosmartak/dietrecallkitPy))
+- Designed for reproducibility and accuracy in research.
+- Simplifies complex calculations, saving time and effort.
+
+------------------------------------------------------------------------
+
+## **Who Is This For?**
+
+- **Nutrition Researchers**: Calculate indicators for dietary
+  assessments with ease.
+- **Data Analysts**: Streamline workflows for nutrient analysis.
+- **Academics and Students**: Learn and apply dietary metrics in a
+  research-ready framework.
+
+------------------------------------------------------------------------
+
+## Installation in R
 
 You can install the development version of dietrecallkit from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/tosmartak/dietrecallkitR) with:
 
 ``` r
 # install.packages("pak")
 pak::pak("tosmartak/dietrecallkitR")
 ```
 
-## Example
+or install from R-CRAN with
+
+``` r
+install.packages("dietrecallkit")
+```
+
+## Quick Start
+
+### Example
 
 The package comes with a lightweight, relational example dataset called
 dietrecall_example. This dataset contains three linked tables:
@@ -28,9 +62,11 @@ what you would have when you used the dietary recall questionnaire from
 the 24hour recall toolkit.
 
 Note: the dataset is just a sample and not a real dataset and must be
-loaded explicitly with data() since LazyData is set to false”
+loaded explicitly with data() since LazyData is set to false”. Ideally
+this should be replaced with your own dataset
 
 ``` r
+# Load the package after installation
 library(dietrecallkit)
 
 # Load the example dataset
@@ -99,7 +135,32 @@ head(dietrecall_example$food_details)
 #> 6 27b5c807-b11c-4c66-a449-061f95f28f06
 ```
 
-## Contributing
+------------------------------------------------------------------------
 
-We welcome contributions! Please see the issues page for ideas or open a
-new issue.
+## **Contributing**
+
+Contributions are welcome! If you’d like to contribute, please: 1. Fork
+the repository. 2. Create a feature branch
+(`git checkout -b feature-name`). 3. Commit your changes
+(`git commit -m 'Add a new feature'`). 4. Push to the branch
+(`git push origin feature-name`). 5. Create a pull request.
+
+------------------------------------------------------------------------
+
+## **License**
+
+`dietrecallkit` is licensed under the [GNU License](LICENSE).
+
+------------------------------------------------------------------------
+
+## **Acknowledgments**
+
+Special thanks to all the contributors and users who have supported the
+development of this package.
+
+------------------------------------------------------------------------
+
+## **Contact**
+
+For questions or feedback, please reach out at
+\[<t.akingbemisilu@cgiar.org>\].

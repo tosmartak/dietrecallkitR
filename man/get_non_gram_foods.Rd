@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_non_gram_foods.R
 \name{get_non_gram_foods}
 \alias{get_non_gram_foods}
-\title{Get Unique Non-Gram Food Items}
+\title{Get Non-Gram Foods}
 \usage{
 get_non_gram_foods(filepath, subcounty_col = "subcounty", export_path = NULL)
 }
@@ -38,6 +38,11 @@ Optionally, the results can be exported to Excel. The exported file contains
 all relevant columns, with two extra empty columns (\code{amount}, \code{gram})
 for user input. Users are expected to fill in only these two columns and
 should avoid modifying \code{subcounty}, \code{food_item}, or \code{unit}.
+
+If all food items in the dataset are recorded in grams
+("g from scale" or "g from photobook"), the function will return
+an empty tibble with the correct columns, print a message to the user,
+and skip Excel export (even if \code{export_path} is provided).
 }
 \examples{
 \dontrun{

@@ -63,7 +63,44 @@ test_that("get_non_gram_foods works with export option", {
   expect_s3_class(result, "tbl_df")
   expect_true(file.exists(out_file))
 
-  exported <- readxl::read_excel(out_file, sheet = "unique_food_items")
+  exported <- readxl::read_excel(out_file, sheet = "non_gram_foods")
   expect_true(all(c("subcounty", "food_item", "unit", "amount", "gram") %in% names(exported)))
   expect_equal(nrow(exported), nrow(result))
+})
+
+test_that("get_non_gram_foods returns message and empty tibble when all units are grams", {
+  skip_if_not_installed("openxlsx")
+
+  # Create modified dataset where all units are grams
+  fd <- dietrecall_example$food_details %>%
+    dplyr::mutate(unit_qty_food_consumed = "g from scale")
+
+  fig <- dietrecall_example$food_ingredients_group %>%
+    dplyr::mutate(food_ingredient_unit = "g from photobook")
+
+  tmpfile <- tempfile(fileext = ".xlsx")
+  openxlsx::write.xlsx(
+    list(
+      maintable = dietrecall_example$maintable,
+      food_details = fd,
+      food_ingredients_group = fig
+    ),
+    tmpfile
+  )
+
+  # Capture messages
+  expect_message(
+    result <- get_non_gram_foods(tmpfile),
+    regexp = "No non-gram food items were found"
+  )
+
+  # Should return an empty tibble with correct columns
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 0)
+  expect_true(all(c("subcounty", "food_item", "unit", "amount", "gram") %in% names(result)))
+
+  # Export should not create a file if no rows
+  out_file <- tempfile(fileext = ".xlsx")
+  get_non_gram_foods(tmpfile, export_path = out_file)
+  expect_false(file.exists(out_file))
 })
