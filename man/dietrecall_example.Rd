@@ -24,6 +24,9 @@ Columns:
 \item{food_ingredients_group}{Tibble with grouped food ingredients linked by \code{survey_id}}
 }
 }
+\usage{
+dietrecall_example
+}
 \description{
 A lightweight three-table relational dataset extracted from a dietary recall survey.
 Contains 100 unique observations with corresponding food details and ingredient groups.
@@ -38,6 +41,5 @@ data(dietrecall_example)
 str(dietrecall_example$maintable)
 head(dietrecall_example$food_details)
 head(dietrecall_example$food_ingredients_group)
-
 }
 \keyword{datasets}

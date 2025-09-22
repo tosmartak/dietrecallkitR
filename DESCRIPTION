@@ -18,7 +18,10 @@ Imports: dplyr,
     rlang,
     stats,
     tibble,
-    tidyr
+    tidyr,
+    openxlsx,
+    readxl,
+    stringr
 Suggests: covr,
     knitr,
     lintr,
