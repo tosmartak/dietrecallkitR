@@ -3,16 +3,16 @@
 #' Extracts unique food items from a dietary recall Excel file where units are
 #' not measured in grams (scale or photobook). Combines results from the
 #' \code{food_details} and \code{food_ingredients_group} sheets and links them
-#' with household subcounty information from the \code{maintable}.
+#' with household location information from the \code{maintable}.
 #'
 #' Optionally, the results can be exported to Excel. The exported file contains
 #' all relevant columns, with two extra empty columns (\code{amount}, \code{gram})
 #' for user input. Users are expected to fill in only these two columns and
-#' should avoid modifying \code{subcounty}, \code{food_item}, or \code{unit}.
+#' should avoid modifying the location column, \code{food_item}, or \code{unit}.
 #'
 #' @param filepath Path to the Excel file containing the dietary recall sheets.
-#' @param subcounty_col Name of the subcounty column in the maintable.
-#'   Defaults to \code{"subcounty"}.
+#' @param location_col Name of the location column in the maintable
+#'   (e.g., subcounty, district). Defaults to \code{"subcounty"}.
 #' @param maintable_sheet Name of the sheet containing the maintable.
 #'   Defaults to \code{"maintable"}.
 #' @param food_details_sheet Name of the sheet containing the food details.
@@ -25,7 +25,7 @@
 #'
 #' @return A tibble with columns:
 #' \describe{
-#'   \item{subcounty}{Subcounty identifier}
+#'   \item{[location_col]}{Location identifier column, as specified in maintable}
 #'   \item{food_item}{Food item consumed or ingredient used}
 #'   \item{unit}{Original unit recorded (not grams)}
 #'   \item{amount}{Empty column for later input}
@@ -49,7 +49,7 @@
 #'
 #' @export
 get_non_gram_foods <- function(filepath,
-                               subcounty_col = "subcounty",
+                               location_col = "subcounty",
                                maintable_sheet = "maintable",
                                food_details_sheet = "food_details",
                                food_ingredients_sheet = "food_ingredients_group",
@@ -72,8 +72,8 @@ get_non_gram_foods <- function(filepath,
   food_ingredients_group <- readxl::read_excel(filepath, sheet = food_ingredients_sheet)
 
   # ---- Validate subcounty column ----
-  if (!subcounty_col %in% names(maintable)) {
-    stop("Column '", subcounty_col, "' not found in maintable.")
+  if (!location_col %in% names(maintable)) {
+    stop("Column '", location_col, "' not found in maintable.")
   }
 
   # ---- food_details ----
@@ -83,11 +83,11 @@ get_non_gram_foods <- function(filepath,
       !unit_qty_food_consumed %in% c("g from scale", "g from photobook")
     ) %>%
     dplyr::left_join(
-      maintable %>% dplyr::select(survey_id, !!subcounty_col),
+      maintable %>% dplyr::select(survey_id, !!rlang::sym(location_col)),
       by = "survey_id"
     ) %>%
     dplyr::select(
-      subcounty = !!rlang::sym(subcounty_col),
+      !!rlang::sym(location_col),
       food_item = desc_of_food,
       unit = unit_qty_food_consumed
     )
@@ -96,11 +96,11 @@ get_non_gram_foods <- function(filepath,
   df2 <- food_ingredients_group %>%
     dplyr::filter(!food_ingredient_unit %in% c("g from scale", "g from photobook")) %>%
     dplyr::left_join(
-      maintable %>% dplyr::select(survey_id, !!subcounty_col),
+      maintable %>% dplyr::select(survey_id, !!rlang::sym(location_col)),
       by = "survey_id"
     ) %>%
     dplyr::select(
-      subcounty = !!rlang::sym(subcounty_col),
+      !!rlang::sym(location_col),
       food_item = food_ingredients_used,
       unit = food_ingredient_unit
     )
@@ -108,7 +108,7 @@ get_non_gram_foods <- function(filepath,
   # ---- Combine + clean ----
   combined <- dplyr::bind_rows(df1, df2) %>%
     dplyr::mutate(food_item = stringr::str_trim(food_item)) %>%
-    dplyr::distinct(subcounty, food_item, unit)
+    dplyr::distinct(!!rlang::sym(location_col), food_item, unit)
 
   final <- combined %>%
     dplyr::mutate(amount = NA_real_, gram = NA_real_)

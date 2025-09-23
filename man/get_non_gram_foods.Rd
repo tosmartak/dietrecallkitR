@@ -6,7 +6,7 @@
 \usage{
 get_non_gram_foods(
   filepath,
-  subcounty_col = "subcounty",
+  location_col = "subcounty",
   maintable_sheet = "maintable",
   food_details_sheet = "food_details",
   food_ingredients_sheet = "food_ingredients_group",
@@ -16,8 +16,8 @@ get_non_gram_foods(
 \arguments{
 \item{filepath}{Path to the Excel file containing the dietary recall sheets.}
 
-\item{subcounty_col}{Name of the subcounty column in the maintable.
-Defaults to \code{"subcounty"}.}
+\item{location_col}{Name of the location column in the maintable
+(e.g., subcounty, district). Defaults to \code{"subcounty"}.}
 
 \item{maintable_sheet}{Name of the sheet containing the maintable.
 Defaults to \code{"maintable"}.}
@@ -35,7 +35,7 @@ empty \code{amount} and \code{gram} fields for later user input.}
 \value{
 A tibble with columns:
 \describe{
-\item{subcounty}{Subcounty identifier}
+\item{\link{location_col}}{Location identifier column, as specified in maintable}
 \item{food_item}{Food item consumed or ingredient used}
 \item{unit}{Original unit recorded (not grams)}
 \item{amount}{Empty column for later input}
@@ -46,13 +46,13 @@ A tibble with columns:
 Extracts unique food items from a dietary recall Excel file where units are
 not measured in grams (scale or photobook). Combines results from the
 \code{food_details} and \code{food_ingredients_group} sheets and links them
-with household subcounty information from the \code{maintable}.
+with household location information from the \code{maintable}.
 }
 \details{
 Optionally, the results can be exported to Excel. The exported file contains
 all relevant columns, with two extra empty columns (\code{amount}, \code{gram})
 for user input. Users are expected to fill in only these two columns and
-should avoid modifying \code{subcounty}, \code{food_item}, or \code{unit}.
+should avoid modifying the location column, \code{food_item}, or \code{unit}.
 
 If all food items in the dataset are recorded in grams
 ("g from scale" or "g from photobook"), the function will return

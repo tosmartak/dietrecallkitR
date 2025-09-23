@@ -37,7 +37,7 @@ The \code{survey_id} column in \code{maintable} serves as a foreign key in
 \code{food_details} and \code{food_ingredients_group}.
 }
 \examples{
-data(dietrecall_example)
+data("dietrecall_example")
 str(dietrecall_example$maintable)
 head(dietrecall_example$food_details)
 head(dietrecall_example$food_ingredients_group)
