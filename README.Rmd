@@ -69,10 +69,10 @@ library(dietrecallkit)
 data("dietrecall_example")
 
 # Explore maintable
-head(dietrecall_example$maintable)
+knitr::kable(head(dietrecall_example$maintable))
 
 # Linked food details
-head(dietrecall_example$food_details)
+knitr::kable(head(dietrecall_example$food_details))
 ```
 
 
@@ -80,6 +80,7 @@ head(dietrecall_example$food_details)
 
 ## **Contributing**
 Contributions are welcome! If you'd like to contribute, please:
+
 1. Fork the repository.
 2. Create a feature branch (`git checkout -b feature-name`).
 3. Commit your changes (`git commit -m 'Add a new feature'`).
