@@ -61,7 +61,7 @@ The package comes with a lightweight, relational example dataset called dietreca
 
 Note: the dataset is just a sample and not a real dataset and must be loaded explicitly with data() since LazyData is set to false”. Ideally this should be replaced with your own dataset
 
-```{r example}
+```{r example, eval=FALSE}
 # Load the package after installation
 library(dietrecallkit)
 
@@ -69,10 +69,13 @@ library(dietrecallkit)
 data("dietrecall_example")
 
 # Explore maintable
-knitr::kable(head(dietrecall_example$maintable))
+head(dietrecall_example$maintable)
 
 # Linked food details
-knitr::kable(head(dietrecall_example$food_details))
+head(dietrecall_example$food_details)
+
+# Linked food ingredient
+head(dietrecall_example$food_ingredients_group)
 ```
 
 
