@@ -2,21 +2,29 @@
 #'
 #' Computes the actual gram intake for foods and ingredients from dietary recall
 #' data. Handles both gram-based and non-gram units, with support for user-
-#' provided non-gram conversion data (from \code{get_non_gram_foods()}).
+#' provided non-gram conversion data (from [get_non_gram_foods()]).
 #'
-#' @param filepath Path to the Excel file containing dietary recall data.
-#' @param non_gram_file Optional. Path to a completed non-gram conversion Excel file.
-#'   If NULL, the function will check for non-gram units and stop if found.
-#' @param maintable_sheet Name of the maintable sheet (default = \code{"maintable"}).
-#' @param food_details_sheet Name of the food details sheet (default = \code{"food_details"}).
-#' @param food_ingredients_sheet Name of the food ingredients sheet
-#'   (default = \code{"food_ingredients_group"}).
-#' @param location_col Name of the location column in the maintable
-#'   (e.g., subcounty, district). Defaults to \code{"subcounty"}.
+#' @param maintable A data frame with survey-level information (must include
+#'   the column specified in `key` and the specified `location_col`).
+#' @param food_details A data frame with food-level information (must include
+#'   the column specified in `key`, plus `desc_of_food`, `qty_food_consumed`,
+#'   `unit_qty_food_consumed`, and `food_item_price_prop_consumed`).
+#' @param food_ingredients A data frame with ingredient-level information (must include
+#'   the column specified in `key`, `food_details_rowid`, `food_ingredients_used`,
+#'   `food_ingredient_amt`, and `food_ingredient_unit`).
+#' @param non_gram_foods Optional. A data frame produced from
+#'   [get_non_gram_foods()] and filled by the user with conversions
+#'   (must include `food_item`, `unit`, `amount`, and `gram`).
+#'   If `NULL`, the function will check for non-gram units and stop if found.
+#' @param location_col Character string. Name of the location column in `maintable`
+#'   (e.g., `"subcounty"`, `"district"`).
+#' @param key Character string. The column name that uniquely links
+#'   `maintable`, `food_details`, and `food_ingredients`.
+#'   Defaults to `"survey_id"`.
 #'
 #' @return A tibble with columns:
 #' \describe{
-#'   \item{survey_id}{Survey identifier}
+#'   \item{<key>}{Survey identifier (column name matches `key` argument)}
 #'   \item{food_item}{Name of food or ingredient}
 #'   \item{amt_consumed}{Amount reported}
 #'   \item{unit}{Unit of measurement}
@@ -26,51 +34,74 @@
 #' }
 #'
 #' @details
-#' - If \code{non_gram_file} is NULL and non-gram units are found, the function
+#' - If `non_gram_foods` is `NULL` and non-gram units are found, the function
 #'   will stop and request a conversion sheet.
-#' - If provided, the non-gram conversion file must include the same location column
-#'   (specified in \code{location_col}), along with columns
-#'   \code{food_item}, \code{unit}, \code{amount}, and \code{gram}.
+#' - If provided, `non_gram_foods` must include the same location column
+#'   (specified in `location_col`), along with columns
+#'   `food_item`, `unit`, `amount`, and `gram`.
 #' - The function warns the user if any non-gram foods lack a valid
-#'   \code{gram_per_unit}.
+#'   `gram_per_unit`.
 #'
 #' @examples
-#' \dontrun{
-#' compute_actual_g_intake("dietary_recall_full.xlsx",
-#'   non_gram_file = "non_gram_foods_conversion_data.xlsx"
+#' data("dietrecall_example")
+#' data("non_gram_foods_conversion")
+#'
+#' # Generate conversion template (normally filled by user)
+#' ngf <- get_non_gram_foods(
+#'   maintable = dietrecall_example$maintable,
+#'   food_details = dietrecall_example$food_details,
+#'   food_ingredients = dietrecall_example$food_ingredients_group,
+#'   location_col = "subcounty",
+#'   key = "survey_id"
 #' )
-#' }
+#'
+#' # Compute intake using packaged example conversion data
+#' result <- compute_actual_g_intake(
+#'   maintable = dietrecall_example$maintable,
+#'   food_details = dietrecall_example$food_details,
+#'   food_ingredients = dietrecall_example$food_ingredients_group,
+#'   non_gram_foods = non_gram_foods_conversion,
+#'   location_col = "subcounty",
+#'   key = "survey_id"
+#' )
+#' head(result)
 #'
 #' @export
-compute_actual_g_intake <- function(filepath,
-                                    non_gram_file = NULL,
-                                    maintable_sheet = "maintable",
-                                    food_details_sheet = "food_details",
-                                    food_ingredients_sheet = "food_ingredients_group",
-                                    location_col = "subcounty") {
-  stopifnot(file.exists(filepath))
-
-  maintable <- readxl::read_excel(filepath, sheet = maintable_sheet)
-  food_details <- readxl::read_excel(filepath, sheet = food_details_sheet)
-  food_ingredients <- readxl::read_excel(filepath, sheet = food_ingredients_sheet)
+compute_actual_g_intake <- function(maintable,
+                                    food_details,
+                                    food_ingredients,
+                                    non_gram_foods = NULL,
+                                    location_col,
+                                    key = "survey_id") {
+  stopifnot(is.data.frame(maintable), is.data.frame(food_details), is.data.frame(food_ingredients))
+  stopifnot(location_col %in% names(maintable))
+  stopifnot(key %in% names(maintable), key %in% names(food_details), key %in% names(food_ingredients))
 
   banned_units <- c("g from scale", "g from photobook")
 
-  # --- Validate location column in maintable ---
-  if (!location_col %in% names(maintable)) {
-    stop("Column '", location_col, "' not found in maintable.")
+  # Helper to validate positive columns
+  validate_positive <- function(df, col) {
+    bad <- df[is.na(df[[col]]) | df[[col]] <= 0, c("food_item", "unit", col)]
+    if (nrow(bad) > 0) {
+      stop(
+        "Invalid values in '", col, "' column of conversion file:\n",
+        paste0("- ", bad$food_item, " [", bad$unit, "] = ", bad[[col]], collapse = "\n"),
+        "\nAll values must be > 0 and not NA."
+      )
+    }
   }
 
-  # --- Load conversion file if provided ---
-  if (!is.null(non_gram_file)) {
-    stopifnot(file.exists(non_gram_file))
-    non_gram_foods <- readxl::read_excel(non_gram_file, sheet = 1) %>%
-      dplyr::mutate(gram_per_unit = gram / amount)
+  # --- Load and validate non_gram_foods ---
+  if (!is.null(non_gram_foods)) {
+    stopifnot(is.data.frame(non_gram_foods))
+    stopifnot(location_col %in% names(non_gram_foods))
+    stopifnot(all(c("food_item", "unit", "amount", "gram") %in% names(non_gram_foods)))
 
-    # Validate location_col exists in conversion file
-    if (!location_col %in% names(non_gram_foods)) {
-      stop("Column '", location_col, "' not found in non_gram_file.")
-    }
+    validate_positive(non_gram_foods, "amount")
+    validate_positive(non_gram_foods, "gram")
+
+    non_gram_foods <- non_gram_foods |>
+      dplyr::mutate(gram_per_unit = gram / amount)
 
     # Validate consistency of location values
     loc_main <- sort(unique(maintable[[location_col]]))
@@ -82,8 +113,6 @@ compute_actual_g_intake <- function(filepath,
         "Non-gram foods: ", paste(loc_non, collapse = ", ")
       )
     }
-  } else {
-    non_gram_foods <- NULL
   }
 
   # --- Check for non-gram units if no file provided ---
@@ -101,14 +130,14 @@ compute_actual_g_intake <- function(filepath,
   }
 
   # --- Process food_details ---
-  fd_clean <- food_details %>%
-    dplyr::filter(!is.na(desc_of_food)) %>%
+  fd_clean <- food_details |>
+    dplyr::filter(!is.na(desc_of_food)) |>
     dplyr::left_join(
-      maintable %>% dplyr::select(survey_id, !!rlang::sym(location_col)),
-      by = "survey_id"
-    ) %>%
+      maintable |> dplyr::select(!!rlang::sym(key), !!rlang::sym(location_col)),
+      by = key
+    ) |>
     dplyr::select(
-      survey_id,
+      !!rlang::sym(key),
       !!rlang::sym(location_col),
       food_item = desc_of_food,
       amt_consumed = qty_food_consumed,
@@ -117,9 +146,9 @@ compute_actual_g_intake <- function(filepath,
     )
 
   if (!is.null(non_gram_foods)) {
-    fd_clean <- fd_clean %>%
+    fd_clean <- fd_clean |>
       dplyr::left_join(
-        non_gram_foods %>%
+        non_gram_foods |>
           dplyr::select(!!rlang::sym(location_col), food_item, unit, gram_per_unit),
         by = c(location_col, "food_item", "unit")
       )
@@ -127,9 +156,9 @@ compute_actual_g_intake <- function(filepath,
     fd_clean$gram_per_unit <- NA_real_
   }
 
-  # Check for missing conversions
-  missing_conv_fd <- fd_clean %>%
-    dplyr::filter(!unit %in% banned_units, is.na(gram_per_unit)) %>%
+  # Warn if missing conversions
+  missing_conv_fd <- fd_clean |>
+    dplyr::filter(!unit %in% banned_units, is.na(gram_per_unit)) |>
     dplyr::distinct(food_item, unit)
 
   if (nrow(missing_conv_fd) > 0) {
@@ -139,7 +168,7 @@ compute_actual_g_intake <- function(filepath,
     )
   }
 
-  fd_clean <- fd_clean %>%
+  fd_clean <- fd_clean |>
     dplyr::mutate(
       prop_consumed = ifelse(is.na(prop_consumed), 1, prop_consumed),
       actual_gram_intake = dplyr::case_when(
@@ -149,34 +178,35 @@ compute_actual_g_intake <- function(filepath,
     )
 
   # --- Process food_ingredients_group ---
-  fig_clean <- food_ingredients %>%
+  fig_clean <- food_ingredients |>
     dplyr::left_join(
-      maintable %>% dplyr::select(survey_id, !!rlang::sym(location_col)),
-      by = "survey_id"
-    ) %>%
+      maintable |> dplyr::select(!!rlang::sym(key), !!rlang::sym(location_col)),
+      by = key
+    ) |>
     dplyr::select(
-      survey_id,
+      !!rlang::sym(key),
       food_details_rowid,
       !!rlang::sym(location_col),
       food_item = food_ingredients_used,
       amt_consumed = food_ingredient_amt,
       unit = food_ingredient_unit,
       prop_consumed = food_ingredient_price_prop_used
-    ) %>%
+    ) |>
     dplyr::left_join(
-      food_details %>% dplyr::select(
-        survey_id,
-        food_details_rowid,
-        amt_of_food_cooked,
-        qty_food_consumed
-      ),
-      by = c("survey_id", "food_details_rowid")
+      food_details |>
+        dplyr::select(
+          !!rlang::sym(key),
+          food_details_rowid,
+          amt_of_food_cooked,
+          qty_food_consumed
+        ),
+      by = c(key, "food_details_rowid")
     )
 
   if (!is.null(non_gram_foods)) {
-    fig_clean <- fig_clean %>%
+    fig_clean <- fig_clean |>
       dplyr::left_join(
-        non_gram_foods %>%
+        non_gram_foods |>
           dplyr::select(!!rlang::sym(location_col), food_item, unit, gram_per_unit),
         by = c(location_col, "food_item", "unit")
       )
@@ -184,9 +214,9 @@ compute_actual_g_intake <- function(filepath,
     fig_clean$gram_per_unit <- NA_real_
   }
 
-  # Check for missing conversions
-  missing_conv_fig <- fig_clean %>%
-    dplyr::filter(!unit %in% banned_units, is.na(gram_per_unit)) %>%
+  # Warn if missing conversions
+  missing_conv_fig <- fig_clean |>
+    dplyr::filter(!unit %in% banned_units, is.na(gram_per_unit)) |>
     dplyr::distinct(food_item, unit)
 
   if (nrow(missing_conv_fig) > 0) {
@@ -196,7 +226,7 @@ compute_actual_g_intake <- function(filepath,
     )
   }
 
-  fig_clean <- fig_clean %>%
+  fig_clean <- fig_clean |>
     dplyr::mutate(
       prop_consumed = ifelse(is.na(prop_consumed), 1, prop_consumed),
       gram_intake = dplyr::case_when(
@@ -204,21 +234,22 @@ compute_actual_g_intake <- function(filepath,
         TRUE ~ amt_consumed * gram_per_unit * prop_consumed
       ),
       actual_gram_intake = (gram_intake * qty_food_consumed) / amt_of_food_cooked
-    )
+    ) |>
+    dplyr::select(-gram_intake)
 
   # --- Combine and return ---
   final <- dplyr::bind_rows(
-    fd_clean %>%
+    fd_clean |>
       dplyr::select(
-        survey_id, food_item, amt_consumed, unit,
+        !!rlang::sym(key), food_item, amt_consumed, unit,
         prop_consumed, gram_per_unit, actual_gram_intake
       ),
-    fig_clean %>%
+    fig_clean |>
       dplyr::select(
-        survey_id, food_item, amt_consumed, unit,
+        !!rlang::sym(key), food_item, amt_consumed, unit,
         prop_consumed, gram_per_unit, actual_gram_intake
       )
   )
 
-  return(final)
+  return(tibble::as_tibble(final))
 }

@@ -31,7 +31,7 @@ maintable_sub <- maintable %>%
     cu,
     mothers_age_in_years
   ) %>%
-  slice_head(n = 20)
+  slice_head(n = 50)
 
 ids <- maintable_sub$survey_id
 

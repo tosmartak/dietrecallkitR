@@ -5,34 +5,42 @@
 \title{Compute Actual Gram Intake}
 \usage{
 compute_actual_g_intake(
-  filepath,
-  non_gram_file = NULL,
-  maintable_sheet = "maintable",
-  food_details_sheet = "food_details",
-  food_ingredients_sheet = "food_ingredients_group",
-  location_col = "subcounty"
+  maintable,
+  food_details,
+  food_ingredients,
+  non_gram_foods = NULL,
+  location_col,
+  key = "survey_id"
 )
 }
 \arguments{
-\item{filepath}{Path to the Excel file containing dietary recall data.}
+\item{maintable}{A data frame with survey-level information (must include
+the column specified in \code{key} and the specified \code{location_col}).}
 
-\item{non_gram_file}{Optional. Path to a completed non-gram conversion Excel file.
-If NULL, the function will check for non-gram units and stop if found.}
+\item{food_details}{A data frame with food-level information (must include
+the column specified in \code{key}, plus \code{desc_of_food}, \code{qty_food_consumed},
+\code{unit_qty_food_consumed}, and \code{food_item_price_prop_consumed}).}
 
-\item{maintable_sheet}{Name of the maintable sheet (default = \code{"maintable"}).}
+\item{food_ingredients}{A data frame with ingredient-level information (must include
+the column specified in \code{key}, \code{food_details_rowid}, \code{food_ingredients_used},
+\code{food_ingredient_amt}, and \code{food_ingredient_unit}).}
 
-\item{food_details_sheet}{Name of the food details sheet (default = \code{"food_details"}).}
+\item{non_gram_foods}{Optional. A data frame produced from
+\code{\link[=get_non_gram_foods]{get_non_gram_foods()}} and filled by the user with conversions
+(must include \code{food_item}, \code{unit}, \code{amount}, and \code{gram}).
+If \code{NULL}, the function will check for non-gram units and stop if found.}
 
-\item{food_ingredients_sheet}{Name of the food ingredients sheet
-(default = \code{"food_ingredients_group"}).}
+\item{location_col}{Character string. Name of the location column in \code{maintable}
+(e.g., \code{"subcounty"}, \code{"district"}).}
 
-\item{location_col}{Name of the location column in the maintable
-(e.g., subcounty, district). Defaults to \code{"subcounty"}.}
+\item{key}{Character string. The column name that uniquely links
+\code{maintable}, \code{food_details}, and \code{food_ingredients}.
+Defaults to \code{"survey_id"}.}
 }
 \value{
 A tibble with columns:
 \describe{
-\item{survey_id}{Survey identifier}
+\item{\if{html}{\out{<key>}}}{Survey identifier (column name matches \code{key} argument)}
 \item{food_item}{Name of food or ingredient}
 \item{amt_consumed}{Amount reported}
 \item{unit}{Unit of measurement}
@@ -44,13 +52,13 @@ A tibble with columns:
 \description{
 Computes the actual gram intake for foods and ingredients from dietary recall
 data. Handles both gram-based and non-gram units, with support for user-
-provided non-gram conversion data (from \code{get_non_gram_foods()}).
+provided non-gram conversion data (from \code{\link[=get_non_gram_foods]{get_non_gram_foods()}}).
 }
 \details{
 \itemize{
-\item If \code{non_gram_file} is NULL and non-gram units are found, the function
+\item If \code{non_gram_foods} is \code{NULL} and non-gram units are found, the function
 will stop and request a conversion sheet.
-\item If provided, the non-gram conversion file must include the same location column
+\item If provided, \code{non_gram_foods} must include the same location column
 (specified in \code{location_col}), along with columns
 \code{food_item}, \code{unit}, \code{amount}, and \code{gram}.
 \item The function warns the user if any non-gram foods lack a valid
@@ -58,10 +66,27 @@ will stop and request a conversion sheet.
 }
 }
 \examples{
-\dontrun{
-compute_actual_g_intake("dietary_recall_full.xlsx",
-  non_gram_file = "non_gram_foods_conversion_data.xlsx"
+data("dietrecall_example")
+data("non_gram_foods_conversion")
+
+# Generate conversion template (normally filled by user)
+ngf <- get_non_gram_foods(
+  maintable = dietrecall_example$maintable,
+  food_details = dietrecall_example$food_details,
+  food_ingredients = dietrecall_example$food_ingredients_group,
+  location_col = "subcounty",
+  key = "survey_id"
 )
-}
+
+# Compute intake using packaged example conversion data
+result <- compute_actual_g_intake(
+  maintable = dietrecall_example$maintable,
+  food_details = dietrecall_example$food_details,
+  food_ingredients = dietrecall_example$food_ingredients_group,
+  non_gram_foods = non_gram_foods_conversion,
+  location_col = "subcounty",
+  key = "survey_id"
+)
+head(result)
 
 }

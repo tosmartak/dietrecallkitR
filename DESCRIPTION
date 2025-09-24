@@ -14,16 +14,13 @@ LazyData: false
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: dplyr,
-    ggplot2,
     rlang,
-    stats,
     tibble,
-    tidyr,
     openxlsx,
-    readxl,
     stringr
 Suggests: covr,
     knitr,
+    readxl,
     lintr,
     pkgdown,
     rmarkdown,

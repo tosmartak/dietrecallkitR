@@ -1,3 +1,5 @@
+# tests/testthat/test-dietrecall_example.R
+
 test_that("dietrecall_example structure is valid", {
   data("dietrecall_example", package = "dietrecallkit")
 
@@ -17,12 +19,12 @@ test_that("dietrecall_example structure is valid", {
   # ---- 3) food_details checks ----
   fd <- dietrecall_example$food_details
   expect_s3_class(fd, "tbl_df")
-  expect_true("survey_id" %in% names(fd))
+  expect_true(all(c("survey_id", "desc_of_food", "unit_qty_food_consumed") %in% names(fd)))
 
   # ---- 4) food_ingredients_group checks ----
   fig <- dietrecall_example$food_ingredients_group
   expect_s3_class(fig, "tbl_df")
-  expect_true("survey_id" %in% names(fig))
+  expect_true(all(c("survey_id", "food_ingredients_used", "food_ingredient_unit") %in% names(fig)))
 
   # ---- 5) Referential integrity ----
   ids <- mt$survey_id
@@ -30,23 +32,14 @@ test_that("dietrecall_example structure is valid", {
   expect_true(all(unique(fig$survey_id) %in% ids))
 })
 
-
 test_that("dietrecall_example works with get_non_gram_foods", {
-  skip_if_not_installed("openxlsx")
-
-  # Write example dataset into a temporary Excel file
-  tmpfile <- tempfile(fileext = ".xlsx")
-  openxlsx::write.xlsx(
-    list(
-      maintable = dietrecall_example$maintable,
-      food_details = dietrecall_example$food_details,
-      food_ingredients_group = dietrecall_example$food_ingredients_group
-    ),
-    tmpfile
+  result <- get_non_gram_foods(
+    maintable = dietrecall_example$maintable,
+    food_details = dietrecall_example$food_details,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    location_col = "subcounty",
+    key = "survey_id"
   )
-
-  # Run function on the example dataset
-  result <- get_non_gram_foods(tmpfile)
 
   # Basic structure check
   expect_s3_class(result, "tbl_df")
@@ -55,6 +48,6 @@ test_that("dietrecall_example works with get_non_gram_foods", {
   # Result should not contain banned units
   expect_false(any(result$unit %in% c("g from scale", "g from photobook")))
 
-  # Subcounties should match those in maintable
+  # Location values should align with maintable
   expect_true(all(result$subcounty %in% dietrecall_example$maintable$subcounty))
 })

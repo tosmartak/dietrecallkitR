@@ -55,3 +55,5 @@ non_gram_foods_conversion <- bind_rows(df1, df2) %>%
 
 # Save for use in tests
 usethis::use_data(non_gram_foods_conversion, overwrite = TRUE)
+
+message("non_gram_foods_conversion created and saved to data/")

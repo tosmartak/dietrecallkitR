@@ -1,67 +1,114 @@
 # tests/testthat/test-get_non_gram_foods.R
 
 test_that("get_non_gram_foods works with example dataset", {
-  skip_if_not_installed("openxlsx")
-
-  # --- subset for speed but maintain integrity ---
-  subset_ids <- head(dietrecall_example$maintable$survey_id, 3)
-  example_small <- list(
-    maintable = dplyr::filter(dietrecall_example$maintable, survey_id %in% subset_ids),
-    food_details = dplyr::filter(dietrecall_example$food_details, survey_id %in% subset_ids),
-    food_ingredients_group = dplyr::filter(dietrecall_example$food_ingredients_group, survey_id %in% subset_ids)
+  result <- get_non_gram_foods(
+    maintable = dietrecall_example$maintable,
+    food_details = dietrecall_example$food_details,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    location_col = "subcounty",
+    key = "survey_id"
   )
 
-  tmpfile <- tempfile(fileext = ".xlsx")
-  openxlsx::write.xlsx(example_small, tmpfile)
-
-  result <- get_non_gram_foods(tmpfile, location_col = "subcounty")
-
-  expect_s3_class(result, "tbl_df")
+  expect_true(tibble::is_tibble(result))
   expect_true(all(c("subcounty", "food_item", "unit", "amount", "gram") %in% names(result)))
 
-  expect_true(all(result$subcounty %in% example_small$maintable$subcounty))
+  # location_col integrity
+  expect_true(all(result$subcounty %in% dietrecall_example$maintable$subcounty))
+
+  # amount and gram should be NA
   expect_true(all(is.na(result$amount)))
   expect_true(all(is.na(result$gram)))
+
+  # Should not contain banned units
   expect_false(any(result$unit %in% c("g from scale", "g from photobook")))
 })
 
-test_that("get_non_gram_foods errors on missing file or location column", {
-  expect_error(get_non_gram_foods("nonexistent.xlsx"))
 
-  subset_ids <- head(dietrecall_example$maintable$survey_id, 3)
-  mt <- dplyr::filter(dietrecall_example$maintable, survey_id %in% subset_ids) %>%
-    dplyr::select(-subcounty)
+test_that("get_non_gram_foods errors if required columns are missing", {
+  mt <- dietrecall_example$maintable %>% dplyr::select(-subcounty)
 
-  tmpfile <- tempfile(fileext = ".xlsx")
-  openxlsx::write.xlsx(
-    list(
+  expect_error(
+    get_non_gram_foods(
       maintable = mt,
-      food_details = dplyr::filter(dietrecall_example$food_details, survey_id %in% subset_ids),
-      food_ingredients_group = dplyr::filter(dietrecall_example$food_ingredients_group, survey_id %in% subset_ids)
-    ),
-    tmpfile
+      food_details = dietrecall_example$food_details,
+      food_ingredients = dietrecall_example$food_ingredients_group,
+      location_col = "subcounty",
+      key = "survey_id"
+    )
   )
 
-  expect_error(get_non_gram_foods(tmpfile, location_col = "subcounty"))
+  fd <- dietrecall_example$food_details %>% dplyr::select(-survey_id)
+  expect_error(
+    get_non_gram_foods(
+      maintable = dietrecall_example$maintable,
+      food_details = fd,
+      food_ingredients = dietrecall_example$food_ingredients_group,
+      location_col = "subcounty",
+      key = "survey_id"
+    )
+  )
+
+  # Wrong key
+  expect_error(
+    get_non_gram_foods(
+      maintable = dietrecall_example$maintable,
+      food_details = dietrecall_example$food_details,
+      food_ingredients = dietrecall_example$food_ingredients_group,
+      location_col = "subcounty",
+      key = "wrong_id"
+    )
+  )
 })
 
-test_that("get_non_gram_foods works with export option", {
-  skip_if_not_installed("openxlsx")
 
-  subset_ids <- head(dietrecall_example$maintable$survey_id, 3)
-  example_small <- list(
-    maintable = dplyr::filter(dietrecall_example$maintable, survey_id %in% subset_ids),
-    food_details = dplyr::filter(dietrecall_example$food_details, survey_id %in% subset_ids),
-    food_ingredients_group = dplyr::filter(dietrecall_example$food_ingredients_group, survey_id %in% subset_ids)
+test_that("get_non_gram_foods trims whitespace from food_item", {
+  fd <- dietrecall_example$food_details %>%
+    dplyr::mutate(desc_of_food = paste0("  ", desc_of_food, "  "))
+
+  result <- get_non_gram_foods(
+    maintable = dietrecall_example$maintable,
+    food_details = fd,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    location_col = "subcounty",
+    key = "survey_id"
   )
 
-  tmpfile <- tempfile(fileext = ".xlsx")
-  openxlsx::write.xlsx(example_small, tmpfile)
+  expect_false(any(grepl("^\\s|\\s$", result$food_item)))
+})
 
+
+test_that("get_non_gram_foods deduplicates multiple units per food item", {
+  fd <- dietrecall_example$food_details %>%
+    dplyr::mutate(unit_qty_food_consumed = ifelse(dplyr::row_number() <= 2, "cup", unit_qty_food_consumed))
+
+  result <- get_non_gram_foods(
+    maintable = dietrecall_example$maintable,
+    food_details = fd,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    location_col = "subcounty",
+    key = "survey_id"
+  )
+
+  dupes <- result %>%
+    dplyr::count(subcounty, food_item, unit) %>%
+    dplyr::filter(n > 1)
+
+  expect_equal(nrow(dupes), 0)
+})
+
+
+test_that("get_non_gram_foods works with export option", {
   out_file <- tempfile(fileext = ".xlsx")
-  result <- get_non_gram_foods(tmpfile, export_path = out_file)
+  result <- get_non_gram_foods(
+    maintable = dietrecall_example$maintable,
+    food_details = dietrecall_example$food_details,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    location_col = "subcounty",
+    key = "survey_id",
+    export_path = out_file
+  )
 
-  expect_s3_class(result, "tbl_df")
+  expect_true(tibble::is_tibble(result))
   expect_true(file.exists(out_file))
 
   exported <- readxl::read_excel(out_file, sheet = "non_gram_foods")
@@ -70,84 +117,71 @@ test_that("get_non_gram_foods works with export option", {
 })
 
 test_that("get_non_gram_foods returns message and empty tibble when all units are grams", {
-  skip_if_not_installed("openxlsx")
-
-  subset_ids <- head(dietrecall_example$maintable$survey_id, 3)
-  fd <- dplyr::filter(dietrecall_example$food_details, survey_id %in% subset_ids) %>%
+  fd <- dietrecall_example$food_details %>%
     dplyr::mutate(unit_qty_food_consumed = "g from scale")
-
-  fig <- dplyr::filter(dietrecall_example$food_ingredients_group, survey_id %in% subset_ids) %>%
+  fig <- dietrecall_example$food_ingredients_group %>%
     dplyr::mutate(food_ingredient_unit = "g from photobook")
 
-  tmpfile <- tempfile(fileext = ".xlsx")
-  openxlsx::write.xlsx(
-    list(
-      maintable = dplyr::filter(dietrecall_example$maintable, survey_id %in% subset_ids),
-      food_details = fd,
-      food_ingredients_group = fig
-    ),
-    tmpfile
-  )
-
   expect_message(
-    result <- get_non_gram_foods(tmpfile),
+    result <- get_non_gram_foods(
+      maintable = dietrecall_example$maintable,
+      food_details = fd,
+      food_ingredients = fig,
+      location_col = "subcounty",
+      key = "survey_id"
+    ),
     regexp = "All food items in the dataset are recorded in grams"
   )
 
-  expect_s3_class(result, "tbl_df")
+  expect_true(tibble::is_tibble(result))
   expect_equal(nrow(result), 0)
   expect_true(all(c("subcounty", "food_item", "unit", "amount", "gram") %in% names(result)))
 
   out_file <- tempfile(fileext = ".xlsx")
-  get_non_gram_foods(tmpfile, export_path = out_file)
+  get_non_gram_foods(
+    maintable = dietrecall_example$maintable,
+    food_details = fd,
+    food_ingredients = fig,
+    location_col = "subcounty",
+    key = "survey_id",
+    export_path = out_file
+  )
   expect_false(file.exists(out_file))
 })
 
 test_that("get_non_gram_foods respects desc_of_food filtering", {
-  subset_ids <- head(dietrecall_example$maintable$survey_id, 3)
-
-  fd <- dplyr::filter(dietrecall_example$food_details, survey_id %in% subset_ids) %>%
+  fd <- dietrecall_example$food_details %>%
     dplyr::mutate(desc_of_food = ifelse(dplyr::row_number() == 1, NA, desc_of_food))
 
-  tmpfile <- tempfile(fileext = ".xlsx")
-  openxlsx::write.xlsx(
-    list(
-      maintable = dplyr::filter(dietrecall_example$maintable, survey_id %in% subset_ids),
-      food_details = fd,
-      food_ingredients_group = dplyr::filter(dietrecall_example$food_ingredients_group, survey_id %in% subset_ids)
-    ),
-    tmpfile
+  result <- get_non_gram_foods(
+    maintable = dietrecall_example$maintable,
+    food_details = fd,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    location_col = "subcounty",
+    key = "survey_id"
   )
 
-  result <- get_non_gram_foods(tmpfile)
   expect_false(any(is.na(result$food_item)))
 })
 
-test_that("get_non_gram_foods works with custom sheet and location names", {
-  subset_ids <- head(dietrecall_example$maintable$survey_id, 3)
-
-  mt <- dplyr::filter(dietrecall_example$maintable, survey_id %in% subset_ids) %>%
-    dplyr::rename(district = subcounty)
-
-  tmpfile <- tempfile(fileext = ".xlsx")
-  openxlsx::write.xlsx(
-    list(
-      mt = mt,
-      fd = dplyr::filter(dietrecall_example$food_details, survey_id %in% subset_ids),
-      fig = dplyr::filter(dietrecall_example$food_ingredients_group, survey_id %in% subset_ids)
-    ),
-    tmpfile
-  )
+test_that("get_non_gram_foods works with custom location and key names", {
+  # Rename subcounty → district, survey_id → id
+  mt <- dietrecall_example$maintable %>%
+    dplyr::rename(district = subcounty, id = survey_id)
+  fd <- dietrecall_example$food_details %>%
+    dplyr::rename(id = survey_id)
+  fig <- dietrecall_example$food_ingredients_group %>%
+    dplyr::rename(id = survey_id)
 
   result <- get_non_gram_foods(
-    tmpfile,
-    maintable_sheet = "mt",
-    food_details_sheet = "fd",
-    food_ingredients_sheet = "fig",
-    location_col = "district"
+    maintable = mt,
+    food_details = fd,
+    food_ingredients = fig,
+    location_col = "district",
+    key = "id"
   )
 
-  expect_s3_class(result, "tbl_df")
+  expect_true(tibble::is_tibble(result))
   expect_true(all(c("district", "food_item", "unit", "amount", "gram") %in% names(result)))
   expect_true(all(result$district %in% mt$district))
 })

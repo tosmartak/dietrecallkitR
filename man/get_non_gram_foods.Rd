@@ -5,28 +5,30 @@
 \title{Get Non-Gram Foods}
 \usage{
 get_non_gram_foods(
-  filepath,
-  location_col = "subcounty",
-  maintable_sheet = "maintable",
-  food_details_sheet = "food_details",
-  food_ingredients_sheet = "food_ingredients_group",
+  maintable,
+  food_details,
+  food_ingredients,
+  location_col,
+  key = "survey_id",
   export_path = NULL
 )
 }
 \arguments{
-\item{filepath}{Path to the Excel file containing the dietary recall sheets.}
+\item{maintable}{A data frame with survey-level information (must include
+\code{key} and the specified \code{location_col}).}
 
-\item{location_col}{Name of the location column in the maintable
-(e.g., subcounty, district). Defaults to \code{"subcounty"}.}
+\item{food_details}{A data frame with food details (must include
+\code{key}, \code{desc_of_food}, and \code{unit_qty_food_consumed}).}
 
-\item{maintable_sheet}{Name of the sheet containing the maintable.
-Defaults to \code{"maintable"}.}
+\item{food_ingredients}{A data frame with food ingredients (must include
+\code{key}, \code{food_ingredients_used}, and \code{food_ingredient_unit}).}
 
-\item{food_details_sheet}{Name of the sheet containing the food details.
-Defaults to \code{"food_details"}.}
+\item{location_col}{Character string. Name of the location column in \code{maintable}
+(e.g., \code{subcounty}, \code{district}). Must be provided explicitly.}
 
-\item{food_ingredients_sheet}{Name of the sheet containing food ingredients.
-Defaults to \code{"food_ingredients_group"}.}
+\item{key}{Character string. The column name that uniquely links
+\code{maintable}, \code{food_details}, and \code{food_ingredients}.
+Typically \code{survey_id}.}
 
 \item{export_path}{Optional. File path to export results as an Excel file.
 If supplied, the Excel file will be created with all required columns and
@@ -35,7 +37,7 @@ empty \code{amount} and \code{gram} fields for later user input.}
 \value{
 A tibble with columns:
 \describe{
-\item{\link{location_col}}{Location identifier column, as specified in maintable}
+\item{\code{location_col}}{Location identifier column, as specified in maintable}
 \item{food_item}{Food item consumed or ingredient used}
 \item{unit}{Original unit recorded (not grams)}
 \item{amount}{Empty column for later input}
@@ -43,10 +45,10 @@ A tibble with columns:
 }
 }
 \description{
-Extracts unique food items from a dietary recall Excel file where units are
-not measured in grams (scale or photobook). Combines results from the
-\code{food_details} and \code{food_ingredients_group} sheets and links them
-with household location information from the \code{maintable}.
+Extracts unique food items from dietary recall data where units are not
+measured in grams ("g from scale" or "g from photobook"). Combines results from
+\code{food_details} and \code{food_ingredients_group} and links them with
+household location information from \code{maintable}.
 }
 \details{
 Optionally, the results can be exported to Excel. The exported file contains
@@ -60,12 +62,13 @@ an empty tibble with the correct columns, print a message to the user,
 and skip Excel export (even if \code{export_path} is provided).
 }
 \examples{
-\dontrun{
-# Return tibble only
-get_non_gram_foods("dietary_recall_full.xlsx")
-
-# Return tibble and export to Excel
-get_non_gram_foods("dietary_recall_full.xlsx", export_path = "non_gram_foods.xlsx")
-}
+data("dietrecall_example")
+get_non_gram_foods(
+  maintable = dietrecall_example$maintable,
+  food_details = dietrecall_example$food_details,
+  food_ingredients = dietrecall_example$food_ingredients_group,
+  location_col = "subcounty",
+  key = "survey_id"
+)
 
 }
