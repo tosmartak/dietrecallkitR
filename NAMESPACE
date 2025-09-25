@@ -2,3 +2,4 @@
 
 export(compute_actual_g_intake)
 export(get_non_gram_foods)
+export(harmonize_food_and_ingredients)

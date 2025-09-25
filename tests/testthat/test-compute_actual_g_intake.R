@@ -260,3 +260,55 @@ test_that("compute_actual_g_intake works when all units are gram-based", {
     result$amt_consumed[result$unit == "g from scale"]
   )
 })
+
+test_that("compute_actual_g_intake trims whitespace in all food sources", {
+  # Create minimal inputs with whitespace
+  mt <- tibble::tibble(
+    survey_id = 1,
+    subcounty = "TEST"
+  )
+
+  fd <- tibble::tibble(
+    survey_id                     = 1,
+    food_details_rowid            = 1,
+    desc_of_food                  = "  Ugali  ",
+    qty_food_consumed             = 100,
+    amt_of_food_cooked            = 200,
+    unit_qty_food_consumed        = "cup",
+    food_item_price_prop_consumed = 1
+  )
+
+  fig <- tibble::tibble(
+    survey_id = 1,
+    food_details_rowid = 1,
+    food_ingredients_used = "  Flour  ",
+    food_ingredient_amt = 2,
+    food_ingredient_unit = "cup",
+    food_ingredient_price_prop_used = 1
+  )
+
+  conv <- tibble::tibble(
+    subcounty = "TEST",
+    food_item = "  Flour  ",
+    unit      = "cup",
+    amount    = 1,
+    gram      = 120
+  )
+
+  expect_warning(
+    result <- compute_actual_g_intake(
+      maintable = mt,
+      food_details = fd,
+      food_ingredients = fig,
+      non_gram_foods = conv,
+      location_col = "subcounty",
+      key = "survey_id"
+    ),
+    regexp = "do not have gram_per_unit assigned"
+  )
+
+  # Check trimming applied
+  expect_false(any(grepl("^\\s|\\s$", result$food_item)))
+  expect_true("Ugali" %in% result$food_item)
+  expect_true("Flour" %in% result$food_item)
+})

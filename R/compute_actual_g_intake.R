@@ -79,6 +79,18 @@ compute_actual_g_intake <- function(maintable,
 
   banned_units <- c("g from scale", "g from photobook")
 
+  # --- Trim whitespace early ---
+  food_details <- food_details |>
+    dplyr::mutate(desc_of_food = stringr::str_trim(desc_of_food))
+
+  food_ingredients <- food_ingredients |>
+    dplyr::mutate(food_ingredients_used = stringr::str_trim(food_ingredients_used))
+
+  if (!is.null(non_gram_foods)) {
+    non_gram_foods <- non_gram_foods |>
+      dplyr::mutate(food_item = stringr::str_trim(food_item))
+  }
+
   # Helper to validate positive columns
   validate_positive <- function(df, col) {
     bad <- df[is.na(df[[col]]) | df[[col]] <= 0, c("food_item", "unit", col)]
