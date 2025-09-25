@@ -2,6 +2,9 @@
 # dietrecallkit Package - R
 
 <!-- badges: start -->
+
+[![License: GPL v2 or
+later](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 <!-- badges: end -->
 
 **dietrecallkit** is a cross-platform package designed to enhance the
@@ -91,14 +94,16 @@ Contributions are welcome! If you’d like to contribute, please:
 1.  Fork the repository.
 2.  Create a feature branch (`git checkout -b feature-name`).
 3.  Commit your changes (`git commit -m 'Add a new feature'`).
-4.  Push to the branch (`git push origin feature-name`).
+4.  Push to the branch (`git push branch-name feature-name`).
 5.  Create a pull request.
 
 ------------------------------------------------------------------------
 
 ## **License**
 
-`dietrecallkit` is licensed under the [GNU License](LICENSE).
+`dietrecallkit` package is licensed under the [GNU General Public
+License (GPL) version 2 or
+later](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
 
 ------------------------------------------------------------------------
 
