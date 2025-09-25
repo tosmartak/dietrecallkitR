@@ -36,6 +36,10 @@ dietary and nutrition-related studies.
 - **Academics and Students**: Learn and apply dietary metrics in a
   research-ready framework.
 
+Generally, this would enable anyone conducting dietary recall related
+research or work, to easily collect, clean, process and analyse dietary
+outcomes.
+
 ------------------------------------------------------------------------
 
 ## Installation in R

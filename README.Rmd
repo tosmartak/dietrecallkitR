@@ -36,6 +36,8 @@ knitr::opts_chunk$set(
 - **Data Analysts**: Streamline workflows for nutrient analysis.
 - **Academics and Students**: Learn and apply dietary metrics in a research-ready framework.
 
+Generally, this would enable anyone conducting dietary recall related research or work, to easily collect, clean, process and analyse dietary outcomes.
+
 ---
 
 
