@@ -11,3 +11,8 @@ reference:
   contents:
   - get_non_gram_foods
   - compute_actual_g_intake
+
+- title: Datasets
+  contents:
+  - dietrecall_example
+  - non_gram_foods_conversion
