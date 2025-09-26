@@ -1,6 +1,6 @@
 # .github/workflows/test-coverage.yaml
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Runs test coverage via covr and uploads directly to Codecov (tokenless for public repos)
+# Runs test coverage via covr and uploads directly to Codecov
 
 name: test-coverage
 
@@ -38,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -50,10 +51,10 @@ jobs:
         with:
           extra-packages: any::covr
           needs: coverage
-          cache-version: 1        # bump to invalidate cache when needed
+          cache-version: 1
 
-      - name: Run tests
-        run: covr::codecov()
+      - name: Run tests and upload coverage to Codecov
+        run: covr::codecov(token = Sys.getenv("CODECOV_TOKEN"))
         shell: Rscript {0}
 
       - name: Show coverage summary
@@ -83,8 +84,3 @@ jobs:
           ## --------------------------------------------------------------------
           find '${{ runner.temp }}/package' -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
-      
-      - name: Upload results to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}

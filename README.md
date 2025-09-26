@@ -1,18 +1,23 @@
 
-# dietrecallkit Package - R
+# `dietrecallkit` Package - R
 
 <!-- badges: start -->
 
 [![License: GPL v2 or
 later](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 [![R-CMD-check](https://github.com/tosmartak/dietrecallkitR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/tosmartak/dietrecallkitR/actions/workflows/R-CMD-check.yaml)
-[![Codecov test
-coverage](https://codecov.io/gh/tosmartak/dietrecallkitR/graph/badge.svg)](https://app.codecov.io/gh/tosmartak/dietrecallkitR)
+[![codecov](https://codecov.io/gh/tosmartak/dietrecallkitR/graph/badge.svg?token=W2YZZEPAM2)](https://codecov.io/gh/tosmartak/dietrecallkitR)
 [![GitHub
 version](https://img.shields.io/github/r-package/v/tosmartak/dietrecallkitR)](https://github.com/tosmartak/dietrecallkitR/)
 [![pkgdown
 site](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://tosmartak.github.io/dietrecallkitR/)
 <!-- badges: end -->
+
+<!-- CRAN badges (uncomment once on CRAN)
+[![CRAN status](https://www.r-pkg.org/badges/version/medmodr)](https://CRAN.R-project.org/package=medmodr)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/medmodr)](https://CRAN.R-project.org/package=medmodr)
+[![CRAN checks](https://badges.cranchecks.info/worst/medmodr.svg)](https://cran.r-project.org/web/checks/check_results_medmodr.html)
+-->
 
 **dietrecallkit** is a cross-platform package designed to enhance the
 efficiency of researchers and analysts in cleaning, processing, and
@@ -49,7 +54,9 @@ outcomes.
 
 ------------------------------------------------------------------------
 
-## Installation in R
+## Getting Started
+
+### Installation in R
 
 You can install the development version of dietrecallkit from
 [GitHub](https://github.com/tosmartak/dietrecallkitR) with:
@@ -65,36 +72,11 @@ or install from R-CRAN with
 install.packages("dietrecallkit")
 ```
 
-## Quick Start
+### **Detailed Documentation & Examples**
 
-### Example
-
-The package comes with a lightweight, relational example dataset called
-dietrecall_example. This dataset contains three linked tables:
-`maintable`, `food_details`, and `food_ingredients_group` similar to
-what you would have when you used the dietary recall questionnaire from
-the 24hour recall toolkit.
-
-Note: the dataset is just a sample and not a real dataset and must be
-loaded explicitly with data() since LazyData is set to false”. Ideally
-this should be replaced with your own dataset
-
-``` r
-# Load the package after installation
-library(dietrecallkit)
-
-# Load the example dataset
-data("dietrecall_example")
-
-# Explore maintable
-head(dietrecall_example$maintable)
-
-# Linked food details
-head(dietrecall_example$food_details)
-
-# Linked food ingredient
-head(dietrecall_example$food_ingredients_group)
-```
+For a step-by-step introduction, including complete walkthrough with
+datasets and code examples, see the [Getting Started
+Guide](https://tosmartak.github.io/dietrecallkitR/articles/getting-started.html)
 
 ------------------------------------------------------------------------
 
@@ -121,7 +103,7 @@ later](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
 
 ------------------------------------------------------------------------
 
-## Code of Conduct
+## **Code of Conduct**
 
 Please note that the dietrecallkit project is released with a
 [Contributor Code of
