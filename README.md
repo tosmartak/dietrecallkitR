@@ -5,6 +5,9 @@
 
 [![License: GPL v2 or
 later](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+[![R-CMD-check](https://github.com/tosmartak/dietrecallkitR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/tosmartak/dietrecallkitR/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/tosmartak/dietrecallkitR/graph/badge.svg)](https://app.codecov.io/gh/tosmartak/dietrecallkitR)
 <!-- badges: end -->
 
 **dietrecallkit** is a cross-platform package designed to enhance the
@@ -93,13 +96,16 @@ head(dietrecall_example$food_ingredients_group)
 
 ## **Contributing**
 
-Contributions are welcome! If you’d like to contribute, please:
+Contributions are welcome! If you’d like to contribute, here is how you
+can help:
 
-1.  Fork the repository.
-2.  Create a feature branch (`git checkout -b feature-name`).
-3.  Commit your changes (`git commit -m 'Add a new feature'`).
-4.  Push to the branch (`git push branch-name feature-name`).
-5.  Create a pull request.
+1.  File an issue on [GitHub
+    Issues](https://github.com/tosmartak/dietrecallkitR/issues)
+2.  Fork the repository.
+3.  Create a feature branch (`git checkout -b feature-name`).
+4.  Commit your changes (`git commit -m 'Add a new feature'`).
+5.  Push to the branch (`git push branch-name feature-name`).
+6.  Create a pull request.
 
 ------------------------------------------------------------------------
 
@@ -108,6 +114,15 @@ Contributions are welcome! If you’d like to contribute, please:
 `dietrecallkit` package is licensed under the [GNU General Public
 License (GPL) version 2 or
 later](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
+
+------------------------------------------------------------------------
+
+## Code of Conduct
+
+Please note that the dietrecallkit project is released with a
+[Contributor Code of
+Conduct](https://tosmartak.github.io/dietrecallkitR/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
 
 ------------------------------------------------------------------------
 

@@ -6,3 +6,6 @@
 inst/doc
 data-raw/*.xlsx
 data-raw/*.xls
+docs
+/doc/
+/Meta/

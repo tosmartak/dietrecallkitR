@@ -6,3 +6,9 @@
 ^dietrecallkitR\.Rproj$
 ^data-raw$
 ^\.Rproj\.user$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^doc$
+^Meta$
+^CODE_OF_CONDUCT\.md$

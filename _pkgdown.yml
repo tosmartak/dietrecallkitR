@@ -1,0 +1,14 @@
+url: https://tosmartak.github.io/dietrecallkitR
+template:
+  bootstrap: 5
+
+reference:
+- title: Qualitative Cleaning and Preprocessing
+  contents:
+  - harmonize_food_and_ingredients
+
+- title: Quantitative Cleaning and Preprocessing
+  contents:
+  - get_non_gram_foods
+  - compute_actual_g_intake
+  

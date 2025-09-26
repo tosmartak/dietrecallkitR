@@ -3,7 +3,7 @@ Title: Toolkit for Cleaning and Processing Dietary Recall Data and
     Indicators
 Version: 0.0.0.9000
 Authors@R: 
-    person("Tosin", "Akingbemisilu", , "you@example.com", role = c("aut", "cre"))
+    person("Tosin", "Akingbemisilu", , "tosinakingbemisilu@gmail.com", role = c("aut", "cre"))
 Description: Utilities to clean, process, and generate indicators from
     dietary recall data.
 License: GPL (>= 2)
@@ -26,3 +26,6 @@ Suggests: covr,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+URL: https://tosmartak.github.io/dietrecallkitR, https://github.com/tosmartak/dietrecallkitR
+BugReports: https://github.com/tosmartak/dietrecallkitR/issues
+VignetteBuilder: knitr
