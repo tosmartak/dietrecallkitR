@@ -52,7 +52,7 @@ jobs:
           needs: coverage
           cache-version: 1        # bump to invalidate cache when needed
 
-      - name: Run tests and upload coverage to Codecov
+      - name: Run tests
         run: covr::codecov()
         shell: Rscript {0}
 
@@ -83,3 +83,8 @@ jobs:
           ## --------------------------------------------------------------------
           find '${{ runner.temp }}/package' -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
+      
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

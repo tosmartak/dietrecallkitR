@@ -8,6 +8,10 @@ later](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](https://www.g
 [![R-CMD-check](https://github.com/tosmartak/dietrecallkitR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/tosmartak/dietrecallkitR/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/tosmartak/dietrecallkitR/graph/badge.svg)](https://app.codecov.io/gh/tosmartak/dietrecallkitR)
+[![GitHub
+version](https://img.shields.io/github/r-package/v/tosmartak/dietrecallkitR)](https://github.com/tosmartak/dietrecallkitR/)
+[![pkgdown
+site](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://tosmartak.github.io/dietrecallkitR/)
 <!-- badges: end -->
 
 **dietrecallkit** is a cross-platform package designed to enhance the
