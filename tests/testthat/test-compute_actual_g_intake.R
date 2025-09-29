@@ -1,6 +1,6 @@
 # tests/testthat/test-compute_actual_g_intake.R
 
-test_that("compute_actual_g_intake returns expected tibble with conversion", {
+test_that("compute_actual_g_intake groups results by default", {
   result <- compute_actual_g_intake(
     maintable = dietrecall_example$maintable,
     food_details = dietrecall_example$food_details,
@@ -10,7 +10,43 @@ test_that("compute_actual_g_intake returns expected tibble with conversion", {
     key = "survey_id"
   )
 
-  expect_true(tibble::is_tibble(result))
+  # Only grouped columns should exist
+  expect_equal(names(result), c("survey_id", "food_item", "actual_gram_intake"))
+
+  # Grouping reduces row count compared to detailed
+  result_detailed <- compute_actual_g_intake(
+    maintable = dietrecall_example$maintable,
+    food_details = dietrecall_example$food_details,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    non_gram_foods = non_gram_foods_conversion,
+    location_col = "subcounty",
+    key = "survey_id",
+    group = FALSE
+  )
+  expect_gt(nrow(result_detailed), nrow(result))
+
+  # Summed intake should match
+  grouped_check <- result_detailed %>%
+    dplyr::group_by(survey_id, food_item) %>%
+    dplyr::summarise(total = sum(actual_gram_intake, na.rm = TRUE), .groups = "drop")
+
+  expect_equal(
+    dplyr::arrange(result, survey_id, food_item)$actual_gram_intake,
+    dplyr::arrange(grouped_check, survey_id, food_item)$total
+  )
+})
+
+test_that("compute_actual_g_intake returns detailed results when group = FALSE", {
+  result <- compute_actual_g_intake(
+    maintable = dietrecall_example$maintable,
+    food_details = dietrecall_example$food_details,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    non_gram_foods = non_gram_foods_conversion,
+    location_col = "subcounty",
+    key = "survey_id",
+    group = FALSE
+  )
+
   expect_true(all(c(
     "survey_id", "food_item", "amt_consumed", "unit",
     "prop_consumed", "gram_per_unit", "actual_gram_intake"
@@ -157,7 +193,8 @@ test_that("compute_actual_g_intake fills missing prop_consumed with 1", {
     food_ingredients = dietrecall_example$food_ingredients_group,
     non_gram_foods = non_gram_foods_conversion,
     location_col = "subcounty",
-    key = "survey_id"
+    key = "survey_id",
+    group = FALSE
   )
 
   expect_true(all(!is.na(result$prop_consumed)))
@@ -204,7 +241,8 @@ test_that("compute_actual_g_intake correctly computes non-gram food_ingredients 
     food_ingredients = fig,
     non_gram_foods = conv,
     location_col = "subcounty",
-    key = "survey_id"
+    key = "survey_id",
+    group = FALSE
   )
 
   expected <- (2 * 120 * 50) / 100
@@ -232,7 +270,8 @@ test_that("compute_actual_g_intake accepts custom location_col and key", {
     food_ingredients = fig,
     non_gram_foods = conv,
     location_col = "district",
-    key = "id"
+    key = "id",
+    group = FALSE
   )
 
   expect_true(tibble::is_tibble(result))
@@ -251,7 +290,8 @@ test_that("compute_actual_g_intake works when all units are gram-based", {
     food_details = fd,
     food_ingredients = fig,
     location_col = "subcounty",
-    key = "survey_id"
+    key = "survey_id",
+    group = FALSE
   )
 
   expect_true(all(is.na(result$gram_per_unit)))
@@ -302,7 +342,8 @@ test_that("compute_actual_g_intake trims whitespace in all food sources", {
       food_ingredients = fig,
       non_gram_foods = conv,
       location_col = "subcounty",
-      key = "survey_id"
+      key = "survey_id",
+      group = FALSE
     ),
     regexp = "do not have gram_per_unit assigned"
   )
@@ -311,4 +352,37 @@ test_that("compute_actual_g_intake trims whitespace in all food sources", {
   expect_false(any(grepl("^\\s|\\s$", result$food_item)))
   expect_true("Ugali" %in% result$food_item)
   expect_true("Flour" %in% result$food_item)
+})
+
+test_that("compute_actual_g_intake warns if non-gram foods in ingredients lack conversion", {
+  mt <- tibble::tibble(survey_id = 1, subcounty = "TEST")
+
+  fd <- tibble::tibble(
+    survey_id = 1, food_details_rowid = 1,
+    desc_of_food = "Ugali", qty_food_consumed = 100, amt_of_food_cooked = 200,
+    unit_qty_food_consumed = "g from scale", food_item_price_prop_consumed = 1
+  )
+
+  fig <- tibble::tibble(
+    survey_id = 1, food_details_rowid = 1,
+    food_ingredients_used = "Oil",
+    food_ingredient_amt = 2,
+    food_ingredient_unit = "tablespoon",
+    food_ingredient_price_prop_used = 1
+  )
+
+  # Conversion file does not include "Oil"
+  conv <- tibble::tibble(
+    subcounty = "TEST",
+    food_item = "Flour", unit = "cup", amount = 1, gram = 120
+  )
+
+  expect_warning(
+    compute_actual_g_intake(
+      maintable = mt, food_details = fd, food_ingredients = fig,
+      non_gram_foods = conv, location_col = "subcounty", key = "survey_id",
+      group = FALSE
+    ),
+    regexp = "do not have gram_per_unit assigned"
+  )
 })

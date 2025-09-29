@@ -21,17 +21,15 @@
 #' @param key Character string. The column name that uniquely links
 #'   `maintable`, `food_details`, and `food_ingredients`.
 #'   Defaults to `"survey_id"`.
+#' @param group Logical, default = `TRUE`. If `TRUE`, results are aggregated
+#'   by `key` and `food_item`, returning summed `actual_gram_intake` only.
+#'   If `FALSE`, detailed row-level data (with intermediate columns) is returned.
 #'
-#' @return A tibble with columns:
-#' \describe{
-#'   \item{<key>}{Survey identifier (column name matches `key` argument)}
-#'   \item{food_item}{Name of food or ingredient}
-#'   \item{amt_consumed}{Amount reported}
-#'   \item{unit}{Unit of measurement}
-#'   \item{prop_consumed}{Proportion consumed (default = 1 if missing)}
-#'   \item{gram_per_unit}{Conversion factor (grams per unit, from non-gram foods)}
-#'   \item{actual_gram_intake}{Final computed intake in grams}
-#' }
+#' @return A tibble:
+#' - If `group = TRUE`: columns `key` - Survey identifier, `food_item` - Name of food or ingredient, `actual_gram_intake` - Final computed intake in grams
+#' - If `group = FALSE`: detailed columns including `amt_consumed` - Amount reported, `unit` - Unit of measurement,
+#'   `prop_consumed` - Proportion consumed `(default = 1 if missing)`, `gram_per_unit` - Conversion factor `(grams per unit, from non-gram foods)`,
+#'   and `actual_gram_intake` - Final computed intake in grams
 #'
 #' @details
 #' - If `non_gram_foods` is `NULL` and non-gram units are found, the function
@@ -46,17 +44,8 @@
 #' data("dietrecall_example")
 #' data("non_gram_foods_conversion")
 #'
-#' # Generate conversion template (normally filled by user)
-#' ngf <- get_non_gram_foods(
-#'   maintable = dietrecall_example$maintable,
-#'   food_details = dietrecall_example$food_details,
-#'   food_ingredients = dietrecall_example$food_ingredients_group,
-#'   location_col = "subcounty",
-#'   key = "survey_id"
-#' )
-#'
-#' # Compute intake using packaged example conversion data
-#' result <- compute_actual_g_intake(
+#' # Default: grouped output, ready for FCT merge
+#' result_grouped <- compute_actual_g_intake(
 #'   maintable = dietrecall_example$maintable,
 #'   food_details = dietrecall_example$food_details,
 #'   food_ingredients = dietrecall_example$food_ingredients_group,
@@ -64,7 +53,21 @@
 #'   location_col = "subcounty",
 #'   key = "survey_id"
 #' )
-#' head(result)
+#'
+#' head(result_grouped)
+#'
+#' # Detailed output (row-level), useful for debugging
+#' result_detailed <- compute_actual_g_intake(
+#'   maintable = dietrecall_example$maintable,
+#'   food_details = dietrecall_example$food_details,
+#'   food_ingredients = dietrecall_example$food_ingredients_group,
+#'   non_gram_foods = non_gram_foods_conversion,
+#'   location_col = "subcounty",
+#'   key = "survey_id",
+#'   group = FALSE
+#' )
+#'
+#' head(result_grouped)
 #'
 #' @export
 compute_actual_g_intake <- function(maintable,
@@ -72,7 +75,8 @@ compute_actual_g_intake <- function(maintable,
                                     food_ingredients,
                                     non_gram_foods = NULL,
                                     location_col,
-                                    key = "survey_id") {
+                                    key = "survey_id",
+                                    group = TRUE) {
   stopifnot(is.data.frame(maintable), is.data.frame(food_details), is.data.frame(food_ingredients))
   stopifnot(location_col %in% names(maintable))
   stopifnot(key %in% names(maintable), key %in% names(food_details), key %in% names(food_ingredients))
@@ -249,7 +253,7 @@ compute_actual_g_intake <- function(maintable,
     ) |>
     dplyr::select(-gram_intake)
 
-  # --- Combine and return ---
+  # --- Combine ---
   final <- dplyr::bind_rows(
     fd_clean |>
       dplyr::select(
@@ -262,6 +266,16 @@ compute_actual_g_intake <- function(maintable,
         prop_consumed, gram_per_unit, actual_gram_intake
       )
   )
+
+  # --- Group if requested ---
+  if (group) {
+    final <- final |>
+      dplyr::group_by(!!rlang::sym(key), food_item) |>
+      dplyr::summarise(
+        actual_gram_intake = sum(actual_gram_intake, na.rm = TRUE),
+        .groups = "drop"
+      )
+  }
 
   return(tibble::as_tibble(final))
 }

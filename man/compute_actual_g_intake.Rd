@@ -10,7 +10,8 @@ compute_actual_g_intake(
   food_ingredients,
   non_gram_foods = NULL,
   location_col,
-  key = "survey_id"
+  key = "survey_id",
+  group = TRUE
 )
 }
 \arguments{
@@ -36,17 +37,18 @@ If \code{NULL}, the function will check for non-gram units and stop if found.}
 \item{key}{Character string. The column name that uniquely links
 \code{maintable}, \code{food_details}, and \code{food_ingredients}.
 Defaults to \code{"survey_id"}.}
+
+\item{group}{Logical, default = \code{TRUE}. If \code{TRUE}, results are aggregated
+by \code{key} and \code{food_item}, returning summed \code{actual_gram_intake} only.
+If \code{FALSE}, detailed row-level data (with intermediate columns) is returned.}
 }
 \value{
-A tibble with columns:
-\describe{
-\item{\if{html}{\out{<key>}}}{Survey identifier (column name matches \code{key} argument)}
-\item{food_item}{Name of food or ingredient}
-\item{amt_consumed}{Amount reported}
-\item{unit}{Unit of measurement}
-\item{prop_consumed}{Proportion consumed (default = 1 if missing)}
-\item{gram_per_unit}{Conversion factor (grams per unit, from non-gram foods)}
-\item{actual_gram_intake}{Final computed intake in grams}
+A tibble:
+\itemize{
+\item If \code{group = TRUE}: columns \code{key} - Survey identifier, \code{food_item} - Name of food or ingredient, \code{actual_gram_intake} - Final computed intake in grams
+\item If \code{group = FALSE}: detailed columns including \code{amt_consumed} - Amount reported, \code{unit} - Unit of measurement,
+\code{prop_consumed} - Proportion consumed \verb{(default = 1 if missing)}, \code{gram_per_unit} - Conversion factor \verb{(grams per unit, from non-gram foods)},
+and \code{actual_gram_intake} - Final computed intake in grams
 }
 }
 \description{
@@ -69,17 +71,8 @@ will stop and request a conversion sheet.
 data("dietrecall_example")
 data("non_gram_foods_conversion")
 
-# Generate conversion template (normally filled by user)
-ngf <- get_non_gram_foods(
-  maintable = dietrecall_example$maintable,
-  food_details = dietrecall_example$food_details,
-  food_ingredients = dietrecall_example$food_ingredients_group,
-  location_col = "subcounty",
-  key = "survey_id"
-)
-
-# Compute intake using packaged example conversion data
-result <- compute_actual_g_intake(
+# Default: grouped output, ready for FCT merge
+result_grouped <- compute_actual_g_intake(
   maintable = dietrecall_example$maintable,
   food_details = dietrecall_example$food_details,
   food_ingredients = dietrecall_example$food_ingredients_group,
@@ -87,6 +80,20 @@ result <- compute_actual_g_intake(
   location_col = "subcounty",
   key = "survey_id"
 )
-head(result)
+
+head(result_grouped)
+
+# Detailed output (row-level), useful for debugging
+result_detailed <- compute_actual_g_intake(
+  maintable = dietrecall_example$maintable,
+  food_details = dietrecall_example$food_details,
+  food_ingredients = dietrecall_example$food_ingredients_group,
+  non_gram_foods = non_gram_foods_conversion,
+  location_col = "subcounty",
+  key = "survey_id",
+  group = FALSE
+)
+
+head(result_grouped)
 
 }

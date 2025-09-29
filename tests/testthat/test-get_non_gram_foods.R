@@ -99,6 +99,7 @@ test_that("get_non_gram_foods deduplicates multiple units per food item", {
 
 test_that("get_non_gram_foods works with export option", {
   out_file <- tempfile(fileext = ".xlsx")
+
   result <- get_non_gram_foods(
     maintable = dietrecall_example$maintable,
     food_details = dietrecall_example$food_details,

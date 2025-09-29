@@ -63,11 +63,13 @@ get_non_gram_foods <- function(maintable,
   stopifnot(key %in% names(food_details))
   stopifnot(key %in% names(food_ingredients))
 
+  banned_units <- c("g from scale", "g from photobook")
+
   # ---- food_details ----
   df1 <- food_details |>
     dplyr::filter(
       !is.na(desc_of_food),
-      !unit_qty_food_consumed %in% c("g from scale", "g from photobook")
+      !unit_qty_food_consumed %in% banned_units
     ) |>
     dplyr::left_join(
       maintable |> dplyr::select(!!rlang::sym(key), !!rlang::sym(location_col)),
@@ -81,7 +83,7 @@ get_non_gram_foods <- function(maintable,
 
   # ---- food_ingredients ----
   df2 <- food_ingredients |>
-    dplyr::filter(!food_ingredient_unit %in% c("g from scale", "g from photobook")) |>
+    dplyr::filter(!food_ingredient_unit %in% banned_units) |>
     dplyr::left_join(
       maintable |> dplyr::select(!!rlang::sym(key), !!rlang::sym(location_col)),
       by = key
@@ -112,10 +114,7 @@ get_non_gram_foods <- function(maintable,
   }
 
   # ---- Optional Excel export ----
-  if (nrow(final) > 0 && !is.null(export_path)) {
-    if (!requireNamespace("openxlsx", quietly = TRUE)) {
-      stop("Package 'openxlsx' is required for export but not installed.")
-    }
+  if (!is.null(export_path)) {
     wb <- openxlsx::createWorkbook()
     openxlsx::addWorksheet(wb, "non_gram_foods")
     openxlsx::writeData(wb, "non_gram_foods", final)
