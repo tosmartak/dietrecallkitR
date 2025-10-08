@@ -19,7 +19,11 @@ Imports: dplyr,
     openxlsx,
     stringr,
     readr,
-    fastDummies
+    fastDummies,
+    janitor,
+    tidyr,
+    stats,
+    purrr
 Suggests: covr,
     knitr,
     readxl,

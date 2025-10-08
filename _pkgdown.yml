@@ -15,6 +15,14 @@ reference:
 - title: Dietary outcomes computation
   contents:
   - compute_mdd
+  - compute_gdr
+  - compute_gdqs
+  - compute_actual_nutrient_intake
+  - estimate_usual_nutrient_intake
+  - compute_ear_adequacy
+  - compute_pni
+  - compute_nar
+  - compute_hfias
 
 - title: Datasets
   contents:

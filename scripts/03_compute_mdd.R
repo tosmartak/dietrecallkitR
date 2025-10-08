@@ -119,3 +119,9 @@ final <- dds_grouped
 print(final)
 
 
+
+# testing_mdd2 <- compute_mdd(recall_data = recall_data,
+#                            id_col = "survey_id",
+#                            food_item_col = "food_item",
+#                            life_stage = "woman",
+#                            use_fct_db = TRUE)

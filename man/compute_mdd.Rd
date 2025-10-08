@@ -62,6 +62,8 @@ for women, men, adolescents, or children, from cleaned dietary recall data.
 \item For children: threshold is ≥5 if breastfeeding included, ≥4 otherwise.
 \item For adults (woman, man, adolescent): threshold is always ≥5.
 \item Warns if unmapped food items are found in recall data.
+\item Final result for children returns the expected 7 food groups and adults returns the expected 10 food group, even if not mapped to any food item
+\item While \code{Others} food group are part of the result, the column is not included in the summation of food groups for dds
 }
 }
 \examples{
