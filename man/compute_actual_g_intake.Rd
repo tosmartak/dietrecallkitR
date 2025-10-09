@@ -78,7 +78,8 @@ result_grouped <- compute_actual_g_intake(
   food_ingredients = dietrecall_example$food_ingredients_group,
   non_gram_foods = non_gram_foods_conversion,
   location_col = "subcounty",
-  key = "survey_id"
+  key = "survey_id",
+  group = FALSE
 )
 
 head(result_grouped)
@@ -90,10 +91,9 @@ result_detailed <- compute_actual_g_intake(
   food_ingredients = dietrecall_example$food_ingredients_group,
   non_gram_foods = non_gram_foods_conversion,
   location_col = "subcounty",
-  key = "survey_id",
-  group = FALSE
+  key = "survey_id"
 )
 
-head(result_grouped)
+head(result_detailed)
 
 }

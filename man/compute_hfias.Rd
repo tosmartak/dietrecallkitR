@@ -19,7 +19,7 @@ A tibble containing the original data with two added columns:
 }
 \description{
 This function computes the HFIA score and categorical classification
-(1–4) based on the standard HFIAS indicator framework developed by
+(1-4) based on the standard HFIAS indicator framework developed by
 FANTA (Food and Nutrition Technical Assistance Project). The function
 assumes that the HFIAS-related variables are provided in the exact order
 they appear in the HFIAS questionnaire (occurrence and frequency pairs).
@@ -48,15 +48,15 @@ and occurrence responses:
 \item "No" = 0
 }
 
-Numeric inputs are accepted directly (0–3). Missing values are automatically
+Numeric inputs are accepted directly (0-3). Missing values are automatically
 replaced with 0, as frequency questions are typically skipped when occurrence
 is "No." After conversion, the function checks for any unexpected text entries
 and raises an informative error listing them for the user to clean.
 
 \strong{Outputs:}
 \itemize{
-\item \code{hfia_score} — The total sum of the nine frequency columns.
-\item \code{hfia_category} — A categorical classification:
+\item \code{hfia_score} - The total sum of the nine frequency columns.
+\item \code{hfia_category} - A categorical classification:
 \describe{
 \item{1}{Food secure}
 \item{2}{Mildly food insecure}

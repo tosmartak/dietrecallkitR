@@ -23,6 +23,7 @@ reference:
   - compute_pni
   - compute_nar
   - compute_hfias
+  - compute_dsr
 
 - title: Datasets
   contents:

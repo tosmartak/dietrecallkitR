@@ -31,6 +31,11 @@
 #' - **Zinc** uses EAR values adjusted for bioavailability (FAO/WHO 2002).
 #' - **Iron** uses skewed, lookup-based probability tables from Allen et al. (2006).
 #'
+#' The function currently supports these nutrients:
+#' Calcium, CHO, Protein, Vitamin A, Vitamin C, Vitamin D, Vitamin E,
+#' Thiamin, Riboflavin, Niacin, Vitamin B6, Folate, Vitamin B12, Copper,
+#' Iodine, Iron (bioavailability must be selected), Magnesium, Molybdenum, Phosphorus, Selenium, Zinc (bioavailability must be selected).
+#'
 #' Each nutrient produces two columns: one for EAR values and one for PNI,
 #' each prefixed with the life group (e.g., `Female_Protein_g_ear`, `Female_Protein_g_pni`).
 #'

@@ -64,8 +64,11 @@ RNI values based on age and life-stage group.
 
 \strong{How RNIs Are Determined:}
 \itemize{
-\item For general nutrients (e.g., protein, vitamin C, folate), RNIs are retrieved
+\item For general nutrients (e.g., Vitamin A, vitamin C, folate etc), RNIs are retrieved
 from the internal \code{.rni_reference()} table based on \code{life_group} and \code{age}.
+\item The function currently supports these nutrients: Vitamin A, Vitamin C, Vitamin D, Vitamin E,
+Thiamin, Riboflavin, Niacin, Vitamin B6, Folate, Vitamin B12, Calcium, Selenium, Iodine, Copper,
+Magnesium, Molybdenum, Phosphorus, Sodium, Potassium, Iron (bioavailability must be selected), Zinc (bioavailability must be selected).
 \item For \strong{zinc} and \strong{iron}, bioavailability-adjusted RNIs are obtained using
 \code{.get_zinc_rni()} and \code{.get_iron_rni()}, respectively.
 }
@@ -84,11 +87,11 @@ reference values (e.g., mg/day, µg/day, g/day).
 \examples{
 df <- tibble::tibble(
   age = c(10, 25, 35),
-  Protein_g = c(0.8, 0.9, 1.0),
+  Calcium_g = c(1000, 500, 800),
   Iron_mg = c(7, 12, 9)
 )
 
-nutrients <- c("Protein" = "Protein_g", "Iron" = "Iron_mg")
+nutrients <- c("Calcium" = "Calcium_g", "Iron" = "Iron_mg")
 
 compute_nar(
   data = df,

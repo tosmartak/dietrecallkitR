@@ -34,8 +34,11 @@
 #'
 #' @details
 #' **How RNIs Are Determined:**
-#' - For general nutrients (e.g., protein, vitamin C, folate), RNIs are retrieved
+#' - For general nutrients (e.g., Vitamin A, vitamin C, folate etc), RNIs are retrieved
 #'   from the internal `.rni_reference()` table based on `life_group` and `age`.
+#' - The function currently supports these nutrients: Vitamin A, Vitamin C, Vitamin D, Vitamin E,
+#'   Thiamin, Riboflavin, Niacin, Vitamin B6, Folate, Vitamin B12, Calcium, Selenium, Iodine, Copper,
+#'   Magnesium, Molybdenum, Phosphorus, Sodium, Potassium, Iron (bioavailability must be selected), Zinc (bioavailability must be selected).
 #' - For **zinc** and **iron**, bioavailability-adjusted RNIs are obtained using
 #'   `.get_zinc_rni()` and `.get_iron_rni()`, respectively.
 #'
@@ -59,11 +62,11 @@
 #' @examples
 #' df <- tibble::tibble(
 #'   age = c(10, 25, 35),
-#'   Protein_g = c(0.8, 0.9, 1.0),
+#'   Calcium_g = c(1000, 500, 800),
 #'   Iron_mg = c(7, 12, 9)
 #' )
 #'
-#' nutrients <- c("Protein" = "Protein_g", "Iron" = "Iron_mg")
+#' nutrients <- c("Calcium" = "Calcium_g", "Iron" = "Iron_mg")
 #'
 #' compute_nar(
 #'   data = df,
@@ -86,6 +89,10 @@ compute_nar <- function(data,
                         nutrients,
                         bioavailability = "moderate",
                         include_rni_values = TRUE) {
+  # Normalize input arguments
+  bioavailability <- tolower(bioavailability)
+  life_group <- stringr::str_to_title(life_group)
+
   # ---------------------------------------------------------------------------
   # 1. Input validation
   # ---------------------------------------------------------------------------
