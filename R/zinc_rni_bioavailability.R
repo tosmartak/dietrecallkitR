@@ -7,27 +7,27 @@
 .zinc_rni_bioavailability <- function() {
   list(
     "Child" = list(
-      age_ranges = list(c(7, 12), c(13, 47), c(48, 95)), # months
+      age_ranges = list(c(12, 47), c(48, 83)), # 1-3 years and 4 - 6 years
       values = list(
-        "low"      = c(8.3, 8.3, 9.6),
-        "moderate" = c(4.1, 4.1, 4.8),
-        "high"     = c(2.4, 2.4, 2.9)
+        "low"      = c(8.3, 9.6),
+        "moderate" = c(4.1, 4.8),
+        "high"     = c(2.4, 2.9)
       )
     ),
     "Female" = list(
-      age_ranges = list(c(14, 18), c(19, 50), c(51, 70), c(71, Inf)),
+      age_ranges = list(c(19, 50)),
       values = list(
-        "low"      = c(10.8, 9.8, 9.8, 9.8),
-        "moderate" = c(5.4, 4.9, 4.9, 4.9),
-        "high"     = c(3.3, 3.0, 3.0, 3.0)
+        "low"      = 9.8,
+        "moderate" = 4.9,
+        "high"     = 3.0
       )
     ),
     "Male" = list(
-      age_ranges = list(c(14, 18), c(19, 50), c(51, 70), c(71, Inf)),
+      age_ranges = list(c(19, 50)),
       values = list(
-        "low"      = c(27.4, 27.4, 27.4, 27.4),
-        "moderate" = c(13.7, 13.7, 13.7, 13.7),
-        "high"     = c(9.1, 9.1, 9.1, 9.1)
+        "low"      = 14.0,
+        "moderate" = 7.0,
+        "high"     = 4.2
       )
     ),
     "Pregnant" = list(

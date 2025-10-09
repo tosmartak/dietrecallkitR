@@ -8,7 +8,7 @@
 .zinc_ear_bioavailability <- function() {
   list(
     "Child" = list(
-      age_ranges = list(c(12, 35), c(36, 71)), # 1–3y, 4–6y in months
+      age_ranges = list(c(12, 47), c(48, 83)), # 1–3y, 4–6y in months
       values = list(
         "low"       = c(6.9, 8.0),
         "moderate"  = c(3.4, 4.0),

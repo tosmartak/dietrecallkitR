@@ -2,6 +2,7 @@
 
 export(compute_actual_g_intake)
 export(compute_actual_nutrient_intake)
+export(compute_dsr)
 export(compute_ear_adequacy)
 export(compute_gdqs)
 export(compute_gdr)

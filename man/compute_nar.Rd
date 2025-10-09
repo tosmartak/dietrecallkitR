@@ -46,9 +46,11 @@ A tibble containing:
 \description{
 The Nutrient Adequacy Ratio (NAR) represents the adequacy of an individual's
 usual intake relative to the Recommended Nutrient Intake (RNI):
-\deqn{NAR = min(Intake / RNI, 1)}
+
+\deqn{NAR = min(Usual Intake / RNI, 1)}
 
 The Mean Adequacy Ratio (MAR) is the average of NARs across multiple nutrients:
+
 \deqn{MAR = (Σ NAR_i) / n}
 
 This approach is widely used to assess the overall diet quality of individuals

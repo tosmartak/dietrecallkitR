@@ -7,27 +7,27 @@
 .iron_rni_bioavailability <- function() {
   list(
     "Child" = list(
-      age_ranges = list(c(7, 12), c(13, 47), c(48, 95)), # months
+      age_ranges = list(c(12, 47), c(48, 83)), # 1-3 years and 4 - 6 years
       values = list(
-        "low"      = c(11.6, 11.6, 12.6),
-        "moderate" = c(5.8, 5.8, 6.3),
-        "high"     = c(3.9, 3.9, 4.2)
+        "low"      = c(11.6, 12.6),
+        "moderate" = c(5.8, 6.3),
+        "high"     = c(3.9, 4.2)
       )
     ),
     "Female" = list(
-      age_ranges = list(c(14, 18), c(19, 50), c(51, 70), c(71, Inf)),
+      age_ranges = list(c(19, 50)),
       values = list(
-        "low"      = c(49.0, 58.8, 26.2, 26.2),
-        "moderate" = c(24.5, 29.4, 13.1, 13.1),
-        "high"     = c(16.3, 19.6, 8.7, 8.7)
+        "low"      = 58.8,
+        "moderate" = 29.4,
+        "high"     = 19.6
       )
     ),
     "Male" = list(
-      age_ranges = list(c(14, 18), c(19, 50), c(51, 70), c(71, Inf)),
+      age_ranges = list(c(19, 50)),
       values = list(
-        "low"      = c(30.4, 27.4, 27.4, 27.4),
-        "moderate" = c(16.7, 13.7, 13.7, 13.7),
-        "high"     = c(12.1, 9.1, 9.1, 9.1)
+        "low"      = 27.4,
+        "moderate" = 13.7,
+        "high"     = 9.1
       )
     ),
     "Pregnant" = list(

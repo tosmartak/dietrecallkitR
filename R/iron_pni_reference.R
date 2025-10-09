@@ -126,7 +126,7 @@
   # Determine which subgroup applies -------------------------------------------
   subgroup <- dplyr::case_when(
     life_group == "Child" & age >= 12 & age <= 47 ~ "Child_1_3", # 12–47 months
-    life_group == "Child" & age >= 48 & age <= 95 ~ "Child_4_8", # 48–95 months
+    life_group == "Child" & age >= 48 & age <= 107 ~ "Child_4_8", # 48–107 months
     life_group == "Female" & age >= 14 & age <= 18 ~ "Female_14_18",
     life_group == "Female" & age > 18 & age <= 50 ~ "Menstruating_Women",
     TRUE ~ NA_character_

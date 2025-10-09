@@ -7,5 +7,5 @@ utils::globalVariables(c(
   "food_ingredient_price_prop_used", "amt_of_food_cooked", "gram_intake",
   "amt_consumed", "actual_gram_intake", "gram", "amount", "gdr", "grp",
   "gdr_Processed Meat", "gdr_category", "gdrminus", "gdrplus", "selected",
-  "gdqs_category", "gdqs", "intake", "gdqs_plus", "gdqs_minus"
+  "gdqs_category", "gdqs", "intake", "gdqs_plus", "gdqs_minus", "species", "dsr"
 ))
