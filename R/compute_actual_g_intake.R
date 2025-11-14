@@ -54,10 +54,10 @@
 #'   key = "survey_id",
 #'   group = FALSE
 #' )
-#'
 #' head(result_grouped)
 #'
 #' # Detailed output (row-level), useful for debugging
+#' \donttest{
 #' result_detailed <- compute_actual_g_intake(
 #'   maintable = dietrecall_example$maintable,
 #'   food_details = dietrecall_example$food_details,
@@ -66,8 +66,8 @@
 #'   location_col = "subcounty",
 #'   key = "survey_id"
 #' )
-#'
 #' head(result_detailed)
+#' }
 #'
 #' @export
 compute_actual_g_intake <- function(maintable,
@@ -77,9 +77,27 @@ compute_actual_g_intake <- function(maintable,
                                     location_col,
                                     key = "survey_id",
                                     group = TRUE) {
+  # ---------------------------------------------------------------------------
+  # Helper: Safely convert to numeric only if character
+  # ---------------------------------------------------------------------------
+  to_num <- function(x) {
+    if (is.character(x) || is.factor(x)) {
+      readr::parse_double(as.character(x), na = c("", "NA"))
+    } else {
+      x
+    }
+  }
+
+  # ---------------------------------------------------------------------------
+  # Basic validations
+  # ---------------------------------------------------------------------------
   stopifnot(is.data.frame(maintable), is.data.frame(food_details), is.data.frame(food_ingredients))
   stopifnot(location_col %in% names(maintable))
-  stopifnot(key %in% names(maintable), key %in% names(food_details), key %in% names(food_ingredients))
+  stopifnot(
+    key %in% names(maintable),
+    key %in% names(food_details),
+    key %in% names(food_ingredients)
+  )
 
   banned_units <- c("g from scale", "g from photobook")
 
@@ -95,7 +113,9 @@ compute_actual_g_intake <- function(maintable,
       dplyr::mutate(food_item = stringr::str_trim(food_item))
   }
 
-  # Helper to validate positive columns
+  # ---------------------------------------------------------------------------
+  # Validate and prepare non_gram_foods
+  # ---------------------------------------------------------------------------
   validate_positive <- function(df, col) {
     bad <- df[is.na(df[[col]]) | df[[col]] <= 0, c("food_item", "unit", col)]
     if (nrow(bad) > 0) {
@@ -112,6 +132,13 @@ compute_actual_g_intake <- function(maintable,
     stopifnot(is.data.frame(non_gram_foods))
     stopifnot(location_col %in% names(non_gram_foods))
     stopifnot(all(c("food_item", "unit", "amount", "gram") %in% names(non_gram_foods)))
+
+    # Safely convert to numeric
+    non_gram_foods <- non_gram_foods |>
+      dplyr::mutate(
+        amount = to_num(amount),
+        gram   = to_num(gram)
+      )
 
     validate_positive(non_gram_foods, "amount")
     validate_positive(non_gram_foods, "gram")
@@ -131,7 +158,9 @@ compute_actual_g_intake <- function(maintable,
     }
   }
 
-  # --- Check for non-gram units if no file provided ---
+  # ---------------------------------------------------------------------------
+  # If non_gram_foods is NULL, ensure no non-gram units are present
+  # ---------------------------------------------------------------------------
   unique_units <- unique(c(
     food_details$unit_qty_food_consumed,
     food_ingredients$food_ingredient_unit
@@ -145,7 +174,9 @@ compute_actual_g_intake <- function(maintable,
     )
   }
 
-  # --- Process food_details ---
+  # ---------------------------------------------------------------------------
+  # Process food_details
+  # ---------------------------------------------------------------------------
   fd_clean <- food_details |>
     dplyr::filter(!is.na(desc_of_food)) |>
     dplyr::left_join(
@@ -159,6 +190,10 @@ compute_actual_g_intake <- function(maintable,
       amt_consumed = qty_food_consumed,
       unit = unit_qty_food_consumed,
       prop_consumed = food_item_price_prop_consumed
+    ) |>
+    dplyr::mutate(
+      amt_consumed = to_num(amt_consumed),
+      prop_consumed = to_num(prop_consumed)
     )
 
   if (!is.null(non_gram_foods)) {
@@ -193,7 +228,9 @@ compute_actual_g_intake <- function(maintable,
       )
     )
 
-  # --- Process food_ingredients_group ---
+  # ---------------------------------------------------------------------------
+  # Process food_ingredients
+  # ---------------------------------------------------------------------------
   fig_clean <- food_ingredients |>
     dplyr::left_join(
       maintable |> dplyr::select(!!rlang::sym(key), !!rlang::sym(location_col)),
@@ -217,6 +254,12 @@ compute_actual_g_intake <- function(maintable,
           qty_food_consumed
         ),
       by = c(key, "food_details_rowid")
+    ) |>
+    dplyr::mutate(
+      amt_consumed        = to_num(amt_consumed),
+      prop_consumed       = to_num(prop_consumed),
+      amt_of_food_cooked  = to_num(amt_of_food_cooked),
+      qty_food_consumed   = to_num(qty_food_consumed)
     )
 
   if (!is.null(non_gram_foods)) {
@@ -253,7 +296,9 @@ compute_actual_g_intake <- function(maintable,
     ) |>
     dplyr::select(-gram_intake)
 
-  # --- Combine ---
+  # ---------------------------------------------------------------------------
+  # Combine outputs
+  # ---------------------------------------------------------------------------
   final <- dplyr::bind_rows(
     fd_clean |>
       dplyr::select(
@@ -267,7 +312,9 @@ compute_actual_g_intake <- function(maintable,
       )
   )
 
-  # --- Group if requested ---
+  # ---------------------------------------------------------------------------
+  # Grouping option
+  # ---------------------------------------------------------------------------
   if (group) {
     final <- final |>
       dplyr::group_by(!!rlang::sym(key), food_item) |>

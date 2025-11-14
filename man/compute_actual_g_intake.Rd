@@ -81,10 +81,10 @@ result_grouped <- compute_actual_g_intake(
   key = "survey_id",
   group = FALSE
 )
-
 head(result_grouped)
 
 # Detailed output (row-level), useful for debugging
+\donttest{
 result_detailed <- compute_actual_g_intake(
   maintable = dietrecall_example$maintable,
   food_details = dietrecall_example$food_details,
@@ -93,7 +93,7 @@ result_detailed <- compute_actual_g_intake(
   location_col = "subcounty",
   key = "survey_id"
 )
-
 head(result_detailed)
+}
 
 }

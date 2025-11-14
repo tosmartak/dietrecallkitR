@@ -386,3 +386,91 @@ test_that("compute_actual_g_intake warns if non-gram foods in ingredients lack c
     regexp = "do not have gram_per_unit assigned"
   )
 })
+
+test_that("compute_actual_g_intake safely converts numeric-like fields using to_num()", {
+  # Minimal maintable with correct key + location
+  mt <- tibble::tibble(
+    survey_id = 1,
+    subcounty = "TEST"
+  )
+
+  # FOOD DETAILS: different input types
+  fd <- tibble::tibble(
+    survey_id                     = 1,
+    food_details_rowid            = 1,
+    desc_of_food                  = "Ugali",
+    qty_food_consumed             = c("50", "  25  ", NA, "3.5", "bad"), # character
+    amt_of_food_cooked            = 200,
+    unit_qty_food_consumed        = "cup",
+    food_item_price_prop_consumed = c("1", NA, "0.5", "bad", 2) # mixed
+  ) %>%
+    dplyr::slice(1) # keep first row for test
+
+  # FOOD INGREDIENTS: include factor and logical
+  fig <- tibble::tibble(
+    survey_id = 1,
+    food_details_rowid = 1,
+    food_ingredients_used = "Flour",
+    food_ingredient_amt = factor("2"), # factor should NOT break
+    food_ingredient_unit = "cup",
+    food_ingredient_price_prop_used = TRUE # logical, untouched
+  )
+
+  # NON-GRAM FOODS: mixed types for amount/gram
+  conv <- tibble::tibble(
+    subcounty = "TEST",
+    food_item = "Flour",
+    unit      = "cup",
+    amount    = c("1", "bad")[1], # character numeric
+    gram      = 120 # already numeric
+  )
+  expect_warning(
+    result <- compute_actual_g_intake(
+      maintable = mt,
+      food_details = fd,
+      food_ingredients = fig,
+      non_gram_foods = conv,
+      location_col = "subcounty",
+      key = "survey_id",
+      group = FALSE
+    ),
+    regexp = "do not have gram_per_unit assigned"
+  )
+
+  # Check internal numeric sanitization occurred
+  expect_true(is.numeric(result$amt_consumed))
+  expect_true(is.numeric(result$prop_consumed))
+
+  # Factors should not break or become NA
+  # food_ingredient_amt was factor("2") → becomes numeric 2
+  expect_true(any(result$amt_consumed == 2))
+
+  # Logical remains untouched (but not used in arithmetic)
+  expect_true(any(is.logical(fig$food_ingredient_price_prop_used)))
+
+  # Character numeric converted
+  expect_true(any(result$amt_consumed == 50))
+
+  # Whitespace numeric converted
+  fd2 <- tibble::tibble(
+    survey_id = 1, food_details_rowid = 1,
+    desc_of_food = "Ugali", qty_food_consumed = " 30 ", amt_of_food_cooked = 100,
+    unit_qty_food_consumed = "cup", food_item_price_prop_consumed = " 0.25 "
+  )
+
+  expect_warning(
+    result2 <- compute_actual_g_intake(
+      maintable = mt, food_details = fd2, food_ingredients = fig,
+      non_gram_foods = conv, location_col = "subcounty", key = "survey_id",
+      group = FALSE
+    ),
+    regexp = "do not have gram_per_unit assigned"
+  )
+
+  expect_true(any(result2$amt_consumed == 30))
+  expect_true(any(result2$prop_consumed == 0.25))
+
+  # Garbage character strings ("bad") should parse to NA
+  # and the pipeline should still run without error
+  expect_true(any(is.na(result$prop_consumed) | is.numeric(result$prop_consumed)))
+})
