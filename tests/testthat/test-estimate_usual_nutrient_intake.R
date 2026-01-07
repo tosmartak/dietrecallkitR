@@ -5,6 +5,11 @@
 # Helper: expect_warning_free (for happy paths)
 expect_warning_free <- function(expr) testthat::expect_silent(expr)
 
+# NOTE:
+# Constant intake values are used intentionally to guarantee
+# non-identifiable between-person variance (Vbetween = 0),
+# so that the NRC skip-adjustment branch is tested deterministically.
+
 # -------------------------------------------------------------------------
 # 1. Minimal valid input (expected limited replicate warning)
 # -------------------------------------------------------------------------
@@ -72,24 +77,45 @@ test_that("auto policy emits expected high-uncertainty and negative between vari
 })
 
 # -------------------------------------------------------------------------
-# 4. Negative between variance handling
+# 4. Non-identifiable between-person variance handling (deterministic)
 # -------------------------------------------------------------------------
-test_that("handles negative between variance and warns appropriately", {
+test_that("non-identifiable between-person variance skips adjustment and preserves transformed means", {
   df <- tibble::tibble(
     id = rep(1:8, each = 2),
-    Energy.kcal_intake = rep(2000, 16)
+    Energy.kcal_intake = rep(2000, 16) # constant intake → Vbetween = 0
   )
 
   suppressWarnings(
     expect_warning(
-      estimate_usual_nutrient_intake(
+      res <- estimate_usual_nutrient_intake(
         df,
         id_col = "id",
         nutrient_cols = "Energy.kcal_intake"
       ),
-      regexp = "Negative between variance|high-uncertainty|Limited replicate information"
+      regexp = "Non-identifiable between-person variance|Skipping adjustment"
     )
   )
+
+  # NRC-consistent reference calculation (default cuberoot)
+  apply_transform <- function(x) x^(1 / 3)
+  inverse_transform <- function(x) x^3
+
+  obs_means <- df %>%
+    dplyr::group_by(id) %>%
+    dplyr::summarise(
+      obs = inverse_transform(mean(apply_transform(Energy.kcal_intake))),
+      .groups = "drop"
+    )
+
+  merged <- dplyr::left_join(res, obs_means, by = "id")
+
+  # Usual intake equals NRC-consistent observed mean
+  expect_true(
+    all(abs(merged$Energy.kcal_intake_usual - merged$obs) < 1e-8)
+  )
+
+  # All values should be identical here by construction
+  expect_equal(length(unique(merged$Energy.kcal_intake_usual)), 1)
 })
 
 # -------------------------------------------------------------------------
@@ -112,7 +138,7 @@ test_that("handles messy nutrient names and extra columns without unexpected war
         id_col = "id",
         nutrient_cols = c("Protein (g)", "Vitamin A (mcg)")
       ),
-      regexp = "Negative between variance|Limited replicate|high-uncertainty"
+      regexp = "Non-identifiable between-person variance|Limited replicate|high-uncertainty"
     )
   )
 
@@ -146,16 +172,16 @@ test_that("transform and jitter options are stable and warning-free", {
 })
 
 # -------------------------------------------------------------------------
-# 7. Detailed = TRUE diagnostics (no warning)
+# 7. detailed = TRUE diagnostics reflect NRC variance identifiability
 # -------------------------------------------------------------------------
-test_that("detailed = TRUE includes all expected diagnostic columns", {
+test_that("detailed = TRUE diagnostics correctly reflect variance identifiability", {
   set.seed(5)
   ids <- rep(1:25, each = 2)
   base <- 1700 + 5 * (1:25)
   y <- as.numeric(rep(base, each = 2)) + rep(c(4, -4), 25)
   df <- tibble::tibble(id = ids, Energy.kcal_intake = y)
 
-  expect_warning_free(
+  suppressWarnings(
     res <- estimate_usual_nutrient_intake(
       recall_data = df,
       id_col = "id",
@@ -164,10 +190,23 @@ test_that("detailed = TRUE includes all expected diagnostic columns", {
     )
   )
 
-  expect_true(any(grepl("_observed_mean$", names(res))))
-  expect_true(any(grepl("_sd_between$", names(res))))
-  expect_true(any(grepl("_sd_observed$", names(res))))
-  expect_true(any(grepl("_shrink_ratio$", names(res))))
+  # Column existence checks
+  expect_true("Energy.kcal_intake_observed_mean" %in% names(res))
+  expect_true("Energy.kcal_intake_sd_between" %in% names(res))
+  expect_true("Energy.kcal_intake_sd_observed" %in% names(res))
+  expect_true("Energy.kcal_intake_shrink_ratio" %in% names(res))
+
+  # sd_between should be either NA (non-identifiable) or non-negative
+  expect_true(
+    all(is.na(res$Energy.kcal_intake_sd_between) |
+      res$Energy.kcal_intake_sd_between >= 0)
+  )
+
+  # shrink ratio should be 1 (skipped adjustment) or between 0 and 1
+  expect_true(
+    all(res$Energy.kcal_intake_shrink_ratio >= 0 &
+      res$Energy.kcal_intake_shrink_ratio <= 1)
+  )
 })
 
 # -------------------------------------------------------------------------
@@ -345,4 +384,42 @@ test_that("lenient policy triggers very low replicate information warning", {
     ),
     regexp = "Very low replicate information"
   )
+})
+
+# -------------------------------------------------------------------------
+# 14. Non-identifiable between variance returns transformed observed means
+# -------------------------------------------------------------------------
+test_that("non-identifiable between variance returns transformed observed means (no shrinkage)", {
+  df <- tibble::tibble(
+    id = rep(1:5, each = 2),
+    Energy.kcal_intake = rep(1800, 10) # constant intake → Vbetween = 0
+  )
+
+  suppressWarnings(
+    res <- estimate_usual_nutrient_intake(
+      df,
+      id_col = "id",
+      nutrient_cols = "Energy.kcal_intake"
+    )
+  )
+
+  apply_transform <- function(x) x^(1 / 3)
+  inverse_transform <- function(x) x^3
+
+  obs_means <- df %>%
+    dplyr::group_by(id) %>%
+    dplyr::summarise(
+      obs = inverse_transform(mean(apply_transform(Energy.kcal_intake))),
+      .groups = "drop"
+    )
+
+  merged <- dplyr::left_join(res, obs_means, by = "id")
+
+  # Exact equality on NRC-consistent scale
+  expect_true(
+    all(abs(merged$Energy.kcal_intake_usual - merged$obs) < 1e-8)
+  )
+
+  # Again, identical by construction
+  expect_equal(length(unique(merged$Energy.kcal_intake_usual)), 1)
 })

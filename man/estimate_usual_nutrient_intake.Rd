@@ -81,6 +81,9 @@ for the ratio of within-to-between variation.
 
 When no repeaters are available, observed means are returned unchanged.
 If insufficient replicate information exists, the behaviour depends on \code{repeater_policy}.
+
+When the estimated between-person variance is non-identifiable (≤ 0),
+the NRC adjustment is skipped and observed mean intakes are returned with a warning.
 }
 \examples{
 # Example with Energy and Protein

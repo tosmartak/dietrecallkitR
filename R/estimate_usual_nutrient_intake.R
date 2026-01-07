@@ -48,6 +48,9 @@
 #' When no repeaters are available, observed means are returned unchanged.
 #' If insufficient replicate information exists, the behaviour depends on `repeater_policy`.
 #'
+#' When the estimated between-person variance is non-identifiable (≤ 0),
+#' the NRC adjustment is skipped and observed mean intakes are returned with a warning.
+#'
 #' @return A tibble containing one row per respondent and estimated usual intakes
 #'   for each nutrient. If `detailed = TRUE`, additional columns include:
 #'   \itemize{
@@ -218,13 +221,21 @@ estimate_usual_nutrient_intake <- function(recall_data,
             }
             v_obs <- msm / n_mean
             v_between <- (msm - mse) / n_mean
-            if (v_between < 0) {
-              if (warn_negative_between) warning("Negative between variance for ", nutrient, ". Flooring to zero.")
-              v_between <- 0
+            if (v_between <= 0) {
+              if (warn_negative_between) {
+                warning(
+                  "Non-identifiable between-person variance for ", nutrient,
+                  ". NRC adjustment skipped and observed means returned."
+                )
+              }
+              shrink_ratio <- 1
+              sd_obs <- sqrt(max(v_obs, 0))
+              sd_between <- NA_real_
+            } else {
+              sd_obs <- sqrt(max(v_obs, 0))
+              sd_between <- sqrt(v_between)
+              shrink_ratio <- if (isTRUE(sd_obs == 0) || is.na(sd_obs)) 0 else sd_between / sd_obs
             }
-            sd_obs <- sqrt(max(v_obs, 0))
-            sd_between <- sqrt(max(v_between, 0))
-            shrink_ratio <- if (isTRUE(sd_obs == 0) || is.na(sd_obs)) 0 else sd_between / sd_obs
           }
         } else if (repeater_policy == "strict") {
           if (mid_info) {
@@ -236,13 +247,21 @@ estimate_usual_nutrient_intake <- function(recall_data,
           } else {
             v_obs <- msm / n_mean
             v_between <- (msm - mse) / n_mean
-            if (v_between < 0) {
-              if (warn_negative_between) warning("Negative between variance for ", nutrient, ". Flooring to zero.")
-              v_between <- 0
+            if (v_between <= 0) {
+              if (warn_negative_between) {
+                warning(
+                  "Non-identifiable between-person variance for ", nutrient,
+                  ". NRC adjustment skipped and observed means returned."
+                )
+              }
+              shrink_ratio <- 1
+              sd_obs <- sqrt(max(v_obs, 0))
+              sd_between <- NA_real_
+            } else {
+              sd_obs <- sqrt(max(v_obs, 0))
+              sd_between <- sqrt(v_between)
+              shrink_ratio <- if (isTRUE(sd_obs == 0) || is.na(sd_obs)) 0 else sd_between / sd_obs
             }
-            sd_obs <- sqrt(max(v_obs, 0))
-            sd_between <- sqrt(max(v_between, 0))
-            shrink_ratio <- if (isTRUE(sd_obs == 0) || is.na(sd_obs)) 0 else sd_between / sd_obs
           }
         } else { # lenient
           if (low_info) {
@@ -253,13 +272,21 @@ estimate_usual_nutrient_intake <- function(recall_data,
           }
           v_obs <- msm / n_mean
           v_between <- (msm - mse) / n_mean
-          if (v_between < 0) {
-            if (warn_negative_between) warning("Negative between variance for ", nutrient, ". Flooring to zero.")
-            v_between <- 0
+          if (v_between <= 0) {
+            if (warn_negative_between) {
+              warning(
+                "Non-identifiable between-person variance for ", nutrient,
+                ". NRC adjustment skipped and observed means returned."
+              )
+            }
+            shrink_ratio <- 1
+            sd_obs <- sqrt(max(v_obs, 0))
+            sd_between <- NA_real_
+          } else {
+            sd_obs <- sqrt(max(v_obs, 0))
+            sd_between <- sqrt(v_between)
+            shrink_ratio <- if (isTRUE(sd_obs == 0) || is.na(sd_obs)) 0 else sd_between / sd_obs
           }
-          sd_obs <- sqrt(max(v_obs, 0))
-          sd_between <- sqrt(max(v_between, 0))
-          shrink_ratio <- if (isTRUE(sd_obs == 0) || is.na(sd_obs)) 0 else sd_between / sd_obs
         }
       }
     } else {
