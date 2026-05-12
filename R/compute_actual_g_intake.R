@@ -98,6 +98,11 @@ compute_actual_g_intake <- function(maintable,
     key %in% names(food_details),
     key %in% names(food_ingredients)
   )
+  
+  stopifnot(
+    "food_details_rowid" %in% names(food_details),
+    "food_details_rowid" %in% names(food_ingredients)
+  )
 
   banned_units <- c("g from scale", "g from photobook")
 
@@ -185,6 +190,7 @@ compute_actual_g_intake <- function(maintable,
     ) |>
     dplyr::select(
       !!rlang::sym(key),
+      food_details_rowid,
       !!rlang::sym(location_col),
       food_item = desc_of_food,
       amt_consumed = qty_food_consumed,
@@ -302,12 +308,12 @@ compute_actual_g_intake <- function(maintable,
   final <- dplyr::bind_rows(
     fd_clean |>
       dplyr::select(
-        !!rlang::sym(key), food_item, amt_consumed, unit,
+        !!rlang::sym(key), food_details_rowid, food_item, amt_consumed, unit,
         prop_consumed, gram_per_unit, actual_gram_intake
       ),
     fig_clean |>
       dplyr::select(
-        !!rlang::sym(key), food_item, amt_consumed, unit,
+        !!rlang::sym(key), food_details_rowid, food_item, amt_consumed, unit,
         prop_consumed, gram_per_unit, actual_gram_intake
       )
   )
