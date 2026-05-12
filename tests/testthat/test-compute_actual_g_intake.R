@@ -474,3 +474,32 @@ test_that("compute_actual_g_intake safely converts numeric-like fields using to_
   # and the pipeline should still run without error
   expect_true(any(is.na(result$prop_consumed) | is.numeric(result$prop_consumed)))
 })
+
+test_that("compute_actual_g_intake keeps food_details_rowid when group is FALSE", {
+  result <- compute_actual_g_intake(
+    maintable = dietrecall_example$maintable,
+    food_details = dietrecall_example$food_details,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    non_gram_foods = non_gram_foods_conversion,
+    location_col = "subcounty",
+    key = "survey_id",
+    group = FALSE
+  )
+  
+  expect_true("food_details_rowid" %in% names(result))
+})
+
+test_that("compute_actual_g_intake drops food_details_rowid when group is TRUE", {
+  result <- compute_actual_g_intake(
+    maintable = dietrecall_example$maintable,
+    food_details = dietrecall_example$food_details,
+    food_ingredients = dietrecall_example$food_ingredients_group,
+    non_gram_foods = non_gram_foods_conversion,
+    location_col = "subcounty",
+    key = "survey_id",
+    group = TRUE
+  )
+  
+  expect_false("food_details_rowid" %in% names(result))
+  expect_true(all(c("survey_id", "food_item", "actual_gram_intake") %in% names(result)))
+})
