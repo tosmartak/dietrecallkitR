@@ -10,11 +10,17 @@
 #' @param key Character string. The column name that uniquely links
 #'   records across `food_details` and `food_ingredients`.
 #'   Defaults to `"survey_id"`.
+#' @param include_rowid Logical, default = `FALSE`. If `TRUE`, the output
+#'   includes `food_details_rowid`, allowing harmonized foods and ingredients
+#'   to be traced back to the original food-level record. The default keeps
+#'   the original two-column output for backward compatibility.
 #'
-#' @return A tibble with two columns:
+#' @return A tibble containing:
 #' \describe{
-#'   \item{<key>}{Survey identifier (column name matches `key` argument)}
-#'   \item{food_item}{Name of food or ingredient}
+#'   \item{<key>}{Survey identifier. The column name matches the `key` argument.}
+#'   \item{food_details_rowid}{Food-level row identifier. Returned only when
+#'   `include_rowid = TRUE`.}
+#'   \item{food_item}{Name of food or ingredient.}
 #' }
 #'
 #' @details
@@ -40,14 +46,14 @@ harmonize_food_and_ingredients <- function(food_details,
                                            include_rowid = FALSE) {
   stopifnot(is.data.frame(food_details), is.data.frame(food_ingredients))
   stopifnot(key %in% names(food_details), key %in% names(food_ingredients))
-  
+
   if (include_rowid) {
     stopifnot(
       "food_details_rowid" %in% names(food_details),
       "food_details_rowid" %in% names(food_ingredients)
     )
   }
-  
+
   fd_clean <- food_details |>
     dplyr::filter(!is.na(desc_of_food)) |>
     dplyr::select(
@@ -56,7 +62,7 @@ harmonize_food_and_ingredients <- function(food_details,
       food_item = desc_of_food
     ) |>
     dplyr::mutate(food_item = stringr::str_trim(food_item))
-  
+
   fig_clean <- food_ingredients |>
     dplyr::select(
       !!rlang::sym(key),
@@ -64,17 +70,17 @@ harmonize_food_and_ingredients <- function(food_details,
       food_item = food_ingredients_used
     ) |>
     dplyr::mutate(food_item = stringr::str_trim(food_item))
-  
+
   if (!include_rowid) {
     fd_clean <- fd_clean |> dplyr::select(-dplyr::any_of("food_details_rowid"))
     fig_clean <- fig_clean |> dplyr::select(-dplyr::any_of("food_details_rowid"))
   }
-  
+
   fd_clean[[key]] <- as.character(fd_clean[[key]])
   fig_clean[[key]] <- as.character(fig_clean[[key]])
-  
+
   final <- dplyr::bind_rows(fd_clean, fig_clean) |>
     tibble::as_tibble()
-  
+
   return(final)
 }

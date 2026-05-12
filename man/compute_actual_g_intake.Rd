@@ -40,15 +40,17 @@ Defaults to \code{"survey_id"}.}
 
 \item{group}{Logical, default = \code{TRUE}. If \code{TRUE}, results are aggregated
 by \code{key} and \code{food_item}, returning summed \code{actual_gram_intake} only.
-If \code{FALSE}, detailed row-level data (with intermediate columns) is returned.}
+If \code{FALSE}, detailed row-level data is returned, including
+\code{food_details_rowid} for tracing foods and ingredients back to the
+original food-level record.}
 }
 \value{
 A tibble:
 \itemize{
-\item If \code{group = TRUE}: columns \code{key} - Survey identifier, \code{food_item} - Name of food or ingredient, \code{actual_gram_intake} - Final computed intake in grams
-\item If \code{group = FALSE}: detailed columns including \code{amt_consumed} - Amount reported, \code{unit} - Unit of measurement,
-\code{prop_consumed} - Proportion consumed \verb{(default = 1 if missing)}, \code{gram_per_unit} - Conversion factor \verb{(grams per unit, from non-gram foods)},
-and \code{actual_gram_intake} - Final computed intake in grams
+\item If \code{group = TRUE}: columns \code{key}, \code{food_item}, and \code{actual_gram_intake}.
+\item If \code{group = FALSE}: detailed row-level columns including \code{food_details_rowid},
+\code{amt_consumed}, \code{unit}, \code{prop_consumed}, \code{gram_per_unit}, and
+\code{actual_gram_intake}.
 }
 }
 \description{

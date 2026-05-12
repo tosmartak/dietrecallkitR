@@ -7,7 +7,8 @@
 harmonize_food_and_ingredients(
   food_details,
   food_ingredients,
-  key = "survey_id"
+  key = "survey_id",
+  include_rowid = FALSE
 )
 }
 \arguments{
@@ -20,12 +21,19 @@ the column specified in \code{key} and \code{food_ingredients_used}).}
 \item{key}{Character string. The column name that uniquely links
 records across \code{food_details} and \code{food_ingredients}.
 Defaults to \code{"survey_id"}.}
+
+\item{include_rowid}{Logical, default = \code{FALSE}. If \code{TRUE}, the output
+includes \code{food_details_rowid}, allowing harmonized foods and ingredients
+to be traced back to the original food-level record. The default keeps
+the original two-column output for backward compatibility.}
 }
 \value{
-A tibble with two columns:
+A tibble containing:
 \describe{
-\item{\if{html}{\out{<key>}}}{Survey identifier (column name matches \code{key} argument)}
-\item{food_item}{Name of food or ingredient}
+\item{\if{html}{\out{<key>}}}{Survey identifier. The column name matches the \code{key} argument.}
+\item{food_details_rowid}{Food-level row identifier. Returned only when
+\code{include_rowid = TRUE}.}
+\item{food_item}{Name of food or ingredient.}
 }
 }
 \description{

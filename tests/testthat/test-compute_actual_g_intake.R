@@ -48,7 +48,7 @@ test_that("compute_actual_g_intake returns detailed results when group = FALSE",
   )
 
   expect_true(all(c(
-    "survey_id", "food_item", "amt_consumed", "unit",
+    "survey_id", "food_details_rowid", "food_item", "amt_consumed", "unit",
     "prop_consumed", "gram_per_unit", "actual_gram_intake"
   ) %in% names(result)))
 })
@@ -485,7 +485,7 @@ test_that("compute_actual_g_intake keeps food_details_rowid when group is FALSE"
     key = "survey_id",
     group = FALSE
   )
-  
+
   expect_true("food_details_rowid" %in% names(result))
 })
 
@@ -499,7 +499,45 @@ test_that("compute_actual_g_intake drops food_details_rowid when group is TRUE",
     key = "survey_id",
     group = TRUE
   )
-  
-  expect_false("food_details_rowid" %in% names(result))
-  expect_true(all(c("survey_id", "food_item", "actual_gram_intake") %in% names(result)))
+
+  expect_equal(names(result), c("survey_id", "food_item", "actual_gram_intake"))
+})
+
+test_that("compute_actual_g_intake preserves food_details_rowid for food details and ingredients", {
+  mt <- tibble::tibble(
+    survey_id = 1,
+    subcounty = "TEST"
+  )
+
+  fd <- tibble::tibble(
+    survey_id                     = 1,
+    food_details_rowid            = 10,
+    desc_of_food                  = "Bread",
+    qty_food_consumed             = 100,
+    amt_of_food_cooked            = 100,
+    unit_qty_food_consumed        = "g from scale",
+    food_item_price_prop_consumed = 1
+  )
+
+  fig <- tibble::tibble(
+    survey_id = 1,
+    food_details_rowid = 10,
+    food_ingredients_used = "Flour",
+    food_ingredient_amt = 50,
+    food_ingredient_unit = "g from scale",
+    food_ingredient_price_prop_used = 1
+  )
+
+  result <- compute_actual_g_intake(
+    maintable = mt,
+    food_details = fd,
+    food_ingredients = fig,
+    location_col = "subcounty",
+    key = "survey_id",
+    group = FALSE
+  )
+
+  expect_true("food_details_rowid" %in% names(result))
+  expect_true(all(result$food_details_rowid == 10))
+  expect_true(all(c("Bread", "Flour") %in% result$food_item))
 })

@@ -100,7 +100,7 @@ compute_actual_g_intake <- function(maintable,
     key %in% names(food_details),
     key %in% names(food_ingredients)
   )
-  
+
   stopifnot(
     "food_details_rowid" %in% names(food_details),
     "food_details_rowid" %in% names(food_ingredients)
