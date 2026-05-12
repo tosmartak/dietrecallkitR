@@ -36,34 +36,45 @@
 #' @export
 harmonize_food_and_ingredients <- function(food_details,
                                            food_ingredients,
-                                           key = "survey_id") {
+                                           key = "survey_id",
+                                           include_rowid = FALSE) {
   stopifnot(is.data.frame(food_details), is.data.frame(food_ingredients))
   stopifnot(key %in% names(food_details), key %in% names(food_ingredients))
-
-  # --- Process food_details ---
+  
+  if (include_rowid) {
+    stopifnot(
+      "food_details_rowid" %in% names(food_details),
+      "food_details_rowid" %in% names(food_ingredients)
+    )
+  }
+  
   fd_clean <- food_details |>
     dplyr::filter(!is.na(desc_of_food)) |>
     dplyr::select(
       !!rlang::sym(key),
+      dplyr::any_of("food_details_rowid"),
       food_item = desc_of_food
     ) |>
     dplyr::mutate(food_item = stringr::str_trim(food_item))
-
-  # --- Process food_ingredients ---
+  
   fig_clean <- food_ingredients |>
     dplyr::select(
       !!rlang::sym(key),
+      dplyr::any_of("food_details_rowid"),
       food_item = food_ingredients_used
     ) |>
     dplyr::mutate(food_item = stringr::str_trim(food_item))
-
-  # --- Coerce key to character to avoid bind_rows error ---
+  
+  if (!include_rowid) {
+    fd_clean <- fd_clean |> dplyr::select(-dplyr::any_of("food_details_rowid"))
+    fig_clean <- fig_clean |> dplyr::select(-dplyr::any_of("food_details_rowid"))
+  }
+  
   fd_clean[[key]] <- as.character(fd_clean[[key]])
   fig_clean[[key]] <- as.character(fig_clean[[key]])
-
-  # --- Combine ---
+  
   final <- dplyr::bind_rows(fd_clean, fig_clean) |>
     tibble::as_tibble()
-
+  
   return(final)
 }
