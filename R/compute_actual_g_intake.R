@@ -23,13 +23,15 @@
 #'   Defaults to `"survey_id"`.
 #' @param group Logical, default = `TRUE`. If `TRUE`, results are aggregated
 #'   by `key` and `food_item`, returning summed `actual_gram_intake` only.
-#'   If `FALSE`, detailed row-level data (with intermediate columns) is returned.
+#'   If `FALSE`, detailed row-level data is returned, including
+#'   `food_details_rowid` for tracing foods and ingredients back to the
+#'   original food-level record.
 #'
 #' @return A tibble:
-#' - If `group = TRUE`: columns `key` - Survey identifier, `food_item` - Name of food or ingredient, `actual_gram_intake` - Final computed intake in grams
-#' - If `group = FALSE`: detailed columns including `amt_consumed` - Amount reported, `unit` - Unit of measurement,
-#'   `prop_consumed` - Proportion consumed `(default = 1 if missing)`, `gram_per_unit` - Conversion factor `(grams per unit, from non-gram foods)`,
-#'   and `actual_gram_intake` - Final computed intake in grams
+#' - If `group = TRUE`: columns `key`, `food_item`, and `actual_gram_intake`.
+#' - If `group = FALSE`: detailed row-level columns including `food_details_rowid`,
+#'   `amt_consumed`, `unit`, `prop_consumed`, `gram_per_unit`, and
+#'   `actual_gram_intake`.
 #'
 #' @details
 #' - If `non_gram_foods` is `NULL` and non-gram units are found, the function
