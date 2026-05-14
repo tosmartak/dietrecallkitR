@@ -30,7 +30,7 @@ the original two-column output for backward compatibility.}
 \value{
 A tibble containing:
 \describe{
-\item{\if{html}{\out{<key>}}}{Survey identifier. The column name matches the \code{key} argument.}
+\item{Survey identifier}{The column specified by the \code{key} argument.}
 \item{food_details_rowid}{Food-level row identifier. Returned only when
 \code{include_rowid = TRUE}.}
 \item{food_item}{Name of food or ingredient.}

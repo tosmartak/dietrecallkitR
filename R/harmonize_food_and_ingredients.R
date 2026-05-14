@@ -17,7 +17,7 @@
 #'
 #' @return A tibble containing:
 #' \describe{
-#'   \item{<key>}{Survey identifier. The column name matches the `key` argument.}
+#'   \item{Survey identifier}{The column specified by the `key` argument.}
 #'   \item{food_details_rowid}{Food-level row identifier. Returned only when
 #'   `include_rowid = TRUE`.}
 #'   \item{food_item}{Name of food or ingredient.}

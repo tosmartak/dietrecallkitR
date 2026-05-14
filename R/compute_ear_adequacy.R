@@ -19,7 +19,7 @@
 #' For each individual, the function:
 #' 1. Looks up the EAR based on the provided age and life-stage group.
 #' 2. Compares the individual’s intake to that EAR.
-#' 3. Returns adequacy = 1 if intake ≥ EAR, otherwise 0.
+#' 3. Returns adequacy = 1 if intake >= EAR, otherwise 0.
 #'
 #' The function currently supports these nutrients:
 #' Calcium, CHO, Protein, Vitamin A, Vitamin C, Vitamin D, Vitamin E,

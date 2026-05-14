@@ -46,7 +46,7 @@ A tibble with one row per respondent (ID). Output columns include:
 \item \code{gdqs_plus}: Sum of points from healthy GDQS categories.
 \item \code{gdqs_minus}: Sum of points from unhealthy GDQS categories.
 \item \code{gdqs_overall}: Total GDQS score (\code{gdqs_plus + gdqs_minus}).
-\item \code{gdqs_risk}: Risk classification: "High" (<15), "Moderate" (15–22), or "Low" (≥23).
+\item \code{gdqs_risk}: Risk classification: "High" (<15), "Moderate" (15–22), or "Low" (>=23).
 }
 }
 \description{

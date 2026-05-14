@@ -27,8 +27,8 @@
 #' - `mdd_<life_stage>` = Binary indicator of meeting MDD
 #'
 #' @details
-#' - For children: threshold is ≥5 if breastfeeding included, ≥4 otherwise.
-#' - For adults (woman, man, adolescent): threshold is always ≥5.
+#' - For children: threshold is >=5 if breastfeeding included, >=4 otherwise.
+#' - For adults (woman, man, adolescent): threshold is always >=5.
 #' - Warns if unmapped food items are found in recall data.
 #' - Final result for children returns the expected 7 food groups and adults returns the expected 10 food group, even if not mapped to any food item
 #' - While `Others` food group are part of the result, the column is not included in the summation of food groups for dds

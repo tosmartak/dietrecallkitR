@@ -71,7 +71,7 @@ adjusting observed 24-hour recall data to estimate the distribution of \emph{usu
 nutrient intakes within a population. The workflow is:
 \enumerate{
 \item Apply the chosen transformation (\code{transform}).
-\item Identify individuals with ≥2 recall days (repeaters).
+\item Identify individuals with >=2 recall days (repeaters).
 \item Estimate within- and between-person variance using ANOVA among repeaters.
 \item Derive shrinkage ratio = SD(between) / SD(observed).
 \item Shrink each individual's mean intake toward the population mean, adjusting
@@ -82,7 +82,7 @@ for the ratio of within-to-between variation.
 When no repeaters are available, observed means are returned unchanged.
 If insufficient replicate information exists, the behaviour depends on \code{repeater_policy}.
 
-When the estimated between-person variance is non-identifiable (≤ 0),
+When the estimated between-person variance is non-identifiable (<= 0),
 the NRC adjustment is skipped and observed mean intakes are returned with a warning.
 }
 \examples{

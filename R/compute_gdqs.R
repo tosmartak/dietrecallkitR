@@ -29,7 +29,7 @@
 #'   \item `gdqs_plus`: Sum of points from healthy GDQS categories.
 #'   \item `gdqs_minus`: Sum of points from unhealthy GDQS categories.
 #'   \item `gdqs_overall`: Total GDQS score (`gdqs_plus + gdqs_minus`).
-#'   \item `gdqs_risk`: Risk classification: "High" (<15), "Moderate" (15–22), or "Low" (≥23).
+#'   \item `gdqs_risk`: Risk classification: "High" (<15), "Moderate" (15–22), or "Low" (>=23).
 #' }
 #'
 #' @details

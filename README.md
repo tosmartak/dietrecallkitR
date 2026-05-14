@@ -6,7 +6,7 @@
 [![License: GPL v2 or
 later](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 [![R-CMD-check](https://github.com/tosmartak/dietrecallkitR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/tosmartak/dietrecallkitR/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/tosmartak/dietrecallkitR/graph/badge.svg?token=W2YZZEPAM2)](https://codecov.io/gh/tosmartak/dietrecallkitR)
+[![codecov](https://codecov.io/gh/tosmartak/dietrecallkitR/graph/badge.svg?token=W2YZZEPAM2)](https://app.codecov.io/gh/tosmartak/dietrecallkitR)
 [![GitHub
 version](https://img.shields.io/github/r-package/v/tosmartak/dietrecallkitR)](https://github.com/tosmartak/dietrecallkitR/)
 [![pkgdown
@@ -32,9 +32,8 @@ dietary and nutrition-related studies.
 
 - Efficient cleaning of data collected using the built in XLSForm
 - Efficient computation of nutrient and dietary indicators.
-- Compatible with **Python** and **R**, catering to a wide range of
-  researchers. ([See Python
-  Repository](https://github.com/tosmartak/dietrecallkitPy))
+- Designed to support both **Python** and **R** workflows, catering to a
+  wide range of researchers and data teams.
 - Designed for reproducibility and accuracy in research.
 - Simplifies complex calculations, saving time and effort.
 

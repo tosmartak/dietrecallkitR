@@ -37,7 +37,7 @@
 #' nutrient intakes within a population. The workflow is:
 #' \enumerate{
 #'   \item Apply the chosen transformation (`transform`).
-#'   \item Identify individuals with ≥2 recall days (repeaters).
+#'   \item Identify individuals with >=2 recall days (repeaters).
 #'   \item Estimate within- and between-person variance using ANOVA among repeaters.
 #'   \item Derive shrinkage ratio = SD(between) / SD(observed).
 #'   \item Shrink each individual's mean intake toward the population mean, adjusting
@@ -48,7 +48,7 @@
 #' When no repeaters are available, observed means are returned unchanged.
 #' If insufficient replicate information exists, the behaviour depends on `repeater_policy`.
 #'
-#' When the estimated between-person variance is non-identifiable (≤ 0),
+#' When the estimated between-person variance is non-identifiable (<= 0),
 #' the NRC adjustment is skipped and observed mean intakes are returned with a warning.
 #'
 #' @return A tibble containing one row per respondent and estimated usual intakes

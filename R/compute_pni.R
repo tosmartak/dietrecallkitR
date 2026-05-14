@@ -27,7 +27,7 @@
 #' @details
 #' For each nutrient:
 #' - **General nutrients** use the normal probability approach:
-#'   \deqn{PNI = 1 - Φ((intake - EAR) / (0.1 × EAR))}
+#'   \deqn{PNI = 1 - Phi((intake - EAR) / (0.1 × EAR))}
 #' - **Zinc** uses EAR values adjusted for bioavailability (FAO/WHO 2002).
 #' - **Iron** uses skewed, lookup-based probability tables from Allen et al. (2006).
 #'

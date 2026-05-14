@@ -51,7 +51,7 @@ usual intake relative to the Recommended Nutrient Intake (RNI):
 
 The Mean Adequacy Ratio (MAR) is the average of NARs across multiple nutrients:
 
-\deqn{MAR = (Σ NAR_i) / n}
+\deqn{MAR = (sum NAR_i) / n}
 
 This approach is widely used to assess the overall diet quality of individuals
 or population subgroups. Values are capped at 1 to prevent high intakes of one

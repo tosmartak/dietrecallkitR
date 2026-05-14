@@ -42,7 +42,7 @@ For each individual, the function:
 \enumerate{
 \item Looks up the EAR based on the provided age and life-stage group.
 \item Compares the individual’s intake to that EAR.
-\item Returns adequacy = 1 if intake ≥ EAR, otherwise 0.
+\item Returns adequacy = 1 if intake >= EAR, otherwise 0.
 }
 
 The function currently supports these nutrients:
